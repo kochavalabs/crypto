@@ -7,6 +7,9 @@ import (
 	"math/big"
 )
 
+// PrivateKeyByteLength defines the length in bytes of a serialized private key
+const PrivateKeyBytesLength = 32
+
 // Signature is a type representing an ECDSA signature
 type Signature struct {
 	R *big.Int
@@ -39,8 +42,12 @@ func (prvk *PrivateKey) Sign(hash []byte) (*Signature, error) {
 	return &Signature{R: r, S: s}, nil
 }
 
-// TODO (elewis) : Serialize to bytes
-// func (prvk *PrivateKey ) Serialize() []byte
+// Serialize returns the private key number d as a big-endian binary-encoded
+// number, padded to a length of 32 bytes.
+func (prvk *PrivateKey) Serialize() []byte {
+	b := make([]byte, 0, PrivateKeyBytesLength)
+	return paddedAppend(PrivateKeyBytesLength, b, prvk.ToECDSA().D.Bytes())
+}
 
 // PublicKey wraps an ecdsa.Public key for convenience
 type PublicKey ecdsa.PublicKey
@@ -76,4 +83,28 @@ func GenerateKeyPairP256() (*PrivateKey, *PublicKey, error) {
 		return nil, nil, err
 	}
 	return (*PrivateKey)(prvKey), (*PublicKey)(&prvKey.PublicKey), nil
+}
+
+// KeyPairFromBytes todo
+func KeyPairFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey, *PublicKey) {
+	x, y := curve.ScalarBaseMult(pk)
+	priv := &ecdsa.PrivateKey{
+		PublicKey: ecdsa.PublicKey{
+			Curve: curve,
+			X:     x,
+			Y:     y,
+		},
+		D: new(big.Int).SetBytes(pk),
+	}
+	return (*PrivateKey)(priv), (*PublicKey)(&priv.PublicKey)
+}
+
+// paddedAppend appends the src byte slice to dst, returning the new slice.
+// If the length of the source is smaller than the passed size, leading zero
+// bytes are appended to the dst slice before appending src.
+func paddedAppend(size uint, dst, src []byte) []byte {
+	for i := 0; i < int(size)-len(src); i++ {
+		dst = append(dst, 0)
+	}
+	return append(dst, src...)
 }
