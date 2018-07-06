@@ -4,10 +4,11 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/x509"
 	"math/big"
 )
 
-// PrivateKeyByteLength defines the length in bytes of a serialized private key
+// PrivateKeyBytesLength defines the length in bytes of a serialized private key
 const PrivateKeyBytesLength = 32
 
 // Signature is a type representing an ECDSA signature
@@ -42,13 +43,6 @@ func (prvk *PrivateKey) Sign(hash []byte) (*Signature, error) {
 	return &Signature{R: r, S: s}, nil
 }
 
-// Serialize returns the private key number d as a big-endian binary-encoded
-// number, padded to a length of 32 bytes.
-func (prvk *PrivateKey) Serialize() []byte {
-	b := make([]byte, 0, PrivateKeyBytesLength)
-	return paddedAppend(PrivateKeyBytesLength, b, prvk.ToECDSA().D.Bytes())
-}
-
 // PublicKey wraps an ecdsa.Public key for convenience
 type PublicKey ecdsa.PublicKey
 
@@ -64,8 +58,9 @@ func (pubk *PublicKey) Verify(hash []byte, sig *Signature) bool {
 	return verified
 }
 
-// TODO (elewis) : Serialize to bytes
-// func (pubk *PublicKey ) Serialize() []byte
+// ------------------
+//     Helpers
+// ------------------
 
 // GenerateKeyPair create a private/public key pair using an elliptic curve
 func GenerateKeyPair(curve elliptic.Curve) (*PrivateKey, *PublicKey, error) {
@@ -99,12 +94,38 @@ func KeyPairFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey, *PublicKey)
 	return (*PrivateKey)(priv), (*PublicKey)(&priv.PublicKey)
 }
 
-// paddedAppend appends the src byte slice to dst, returning the new slice.
-// If the length of the source is smaller than the passed size, leading zero
-// bytes are appended to the dst slice before appending src.
-func paddedAppend(size uint, dst, src []byte) []byte {
-	for i := 0; i < int(size)-len(src); i++ {
-		dst = append(dst, 0)
+// X509MarshalECPrivateKey marshals an EC private key into ASN.1, DER format. (wrapper around x509 in crypto pkg)
+func X509MarshalECPrivateKey(key *PrivateKey) ([]byte, error) {
+	x509Encoded, err := x509.MarshalECPrivateKey(key.ToECDSA())
+	if err != nil {
+		return nil, err
 	}
-	return append(dst, src...)
+	return x509Encoded, nil
+}
+
+// X509MarhsalECPublicKey serialises a public key to DER-encoded PKIX format. (wrapper around x509 in crypto pkg)
+func X509MarhsalECPublicKey(key *PublicKey) ([]byte, error) {
+	x509EncodePubKey, err := x509.MarshalPKIXPublicKey(key)
+	if err != nil {
+		return nil, err
+	}
+	return x509EncodePubKey, nil
+}
+
+// X509UnmarshalECPrivateKey  parses an ASN.1 Elliptic Curve Private Key Structure (wrapper around x509 in crypto pkg)
+func X509UnmarshalECPrivateKey(der []byte) (*PrivateKey, error) {
+	key, err := x509.ParseECPrivateKey(der)
+	if err != nil {
+		return nil, err
+	}
+	return (*PrivateKey)(key), nil
+}
+
+// X509UnmarshalECPublicKey parses a DER encoded public key. (wrapper around x509 in crypto pkg)
+func X509UnmarshalECPublicKey(der []byte) (*PublicKey, error) {
+	key, err := x509.ParsePKIXPublicKey(der)
+	if err != nil {
+		return nil, err
+	}
+	return key.(*PublicKey), nil
 }
