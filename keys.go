@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/pem"
 	"math/big"
 )
 
@@ -16,9 +17,6 @@ type Signature struct {
 	R *big.Int
 	S *big.Int
 }
-
-// TODO (elewis) : serialize signature to bytes
-// func (sig *Signature) Serialize() []byte
 
 // PrivateKey wraps an ecdsa.PrivateKey to provide convenience functions
 type PrivateKey ecdsa.PrivateKey
@@ -128,4 +126,22 @@ func X509UnmarshalECPublicKey(der []byte) (*PublicKey, error) {
 		return nil, err
 	}
 	return key.(*PublicKey), nil
+}
+
+// PemEncodePrivateKey returns the PEM encoding of key
+func PemEncodePrivateKey(key *PrivateKey) []byte {
+	x509encoded, err := X509MarshalECPrivateKey(key)
+	if err != nil {
+		return nil
+	}
+	return pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: x509encoded})
+}
+
+// PemEncodePublicKey returns the PEM encoding of key
+func PemEncodePublicKey(key *PublicKey) []byte {
+	x509encoded, err := X509MarhsalECPublicKey(key)
+	if err != nil {
+		return nil
+	}
+	return pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509encoded})
 }
