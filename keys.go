@@ -104,7 +104,7 @@ func X509MarshalECPrivateKey(key *PrivateKey) ([]byte, error) {
 
 // X509MarhsalECPublicKey serialises a public key to DER-encoded PKIX format. (wrapper around x509 in crypto pkg)
 func X509MarhsalECPublicKey(key *PublicKey) ([]byte, error) {
-	x509EncodePubKey, err := x509.MarshalPKIXPublicKey(key)
+	x509EncodePubKey, err := x509.MarshalPKIXPublicKey(key.ToECDSA())
 	if err != nil {
 		return nil, err
 	}
@@ -123,10 +123,11 @@ func X509UnmarshalECPrivateKey(der []byte) (*PrivateKey, error) {
 // X509UnmarshalECPublicKey parses a DER encoded public key. (wrapper around x509 in crypto pkg)
 func X509UnmarshalECPublicKey(der []byte) (*PublicKey, error) {
 	key, err := x509.ParsePKIXPublicKey(der)
+	eckey := key.(*ecdsa.PublicKey)
 	if err != nil {
 		return nil, err
 	}
-	return key.(*PublicKey), nil
+	return (*PublicKey)(eckey), nil
 }
 
 // PemEncodePrivateKey returns the PEM encoding of key
