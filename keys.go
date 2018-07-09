@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"math/big"
 )
 
@@ -56,9 +57,9 @@ func (pubk *PublicKey) Verify(hash []byte, sig *Signature) bool {
 	return verified
 }
 
-// ------------------
-//     Helpers
-// ------------------
+// ---------------------------
+// exported utility functions
+// ---------------------------
 
 // GenerateKeyPair create a private/public key pair using an elliptic curve
 func GenerateKeyPair(curve elliptic.Curve) (*PrivateKey, *PublicKey, error) {
@@ -144,4 +145,32 @@ func PemEncodePublicKey(key *PublicKey) []byte {
 		return nil
 	}
 	return pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509encoded})
+}
+
+// PemDecodePrivateKey will find the next PEM formatted block (certificate, private key etc) in the input
+// If no PEM data is found, PrivateKey will be nil and an error will be returned
+func PemDecodePrivateKey(pemEncoded []byte) (*PrivateKey, error) {
+	block, _ := pem.Decode(pemEncoded)
+	if block == nil {
+		return nil, errors.New("Missing block data")
+	}
+	prvKey, err := X509UnmarshalECPrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return prvKey, nil
+}
+
+// PemDecodePublicKey will find the next PEM formatted block (certificate, private key etc) in the input
+// If no PEM data is found, PublicKey will be nil and an error will be returned
+func PemDecodePublicKey(pemEncoded []byte) (*PublicKey, error) {
+	block, _ := pem.Decode(pemEncoded)
+	if block == nil {
+		return nil, errors.New("Missing block data")
+	}
+	pubKey, err := X509UnmarshalECPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return pubKey, nil
 }
