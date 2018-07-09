@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -102,5 +103,40 @@ func TestNonDeterministic(t *testing.T) {
 
 	if sig1.R == sig2.R && sig1.S == sig2.S {
 		t.Error("Expected : mismatch signatures, Got: matching signatures")
+	}
+}
+
+func TestX509MarshalingEllipticCurvesKeys(t *testing.T) {
+	prv, pub, err := GenerateKeyPairP256()
+	if err != nil {
+		t.Error("Failed to generate keys using P256 ellipitic curve", err)
+	}
+
+	x509Encodedpriv, err := X509MarshalECPrivateKey(prv)
+	if err != nil {
+		t.Error("Failed to marshal private key", err)
+	}
+
+	x509Encodedpub, err := X509MarhsalECPublicKey(pub)
+	if err != nil {
+		t.Error("failed to marshal public key", err)
+	}
+
+	privkey, err := X509UnmarshalECPrivateKey(x509Encodedpriv)
+	if err != nil {
+		t.Error("failed to unmarshal private key", err)
+	}
+
+	pubkey, err := X509UnmarshalECPublicKey(x509Encodedpub)
+	if err != nil {
+		t.Error("failed to unmarshal public key", err)
+	}
+
+	if !reflect.DeepEqual(prv, privkey) {
+		t.Error("Keys do not match after unmarshaling")
+	}
+
+	if !reflect.DeepEqual(pub, pubkey) {
+		t.Error("keys do not match after unmarshaling")
 	}
 }
