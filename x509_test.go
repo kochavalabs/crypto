@@ -36,3 +36,34 @@ func TestMarshalling(t *testing.T) {
 		t.Error("public keys do not match")
 	}
 }
+
+func TestDeterministicMarshalling(t *testing.T) {
+	prv, pub, err := GenerateKeyPairP256()
+	if err != nil {
+		t.Error(err)
+	}
+	derPriv, err := MarhsalPrivateKeyX509(prv)
+	if err != nil {
+		t.Error(err)
+	}
+	derPriv2, err := MarhsalPrivateKeyX509(prv)
+	if err != nil {
+		t.Error(err)
+	}
+	derPub, err := MarshaPublicKeyX509(pub)
+	if err != nil {
+		t.Error(err)
+	}
+	derPub2, err := MarshaPublicKeyX509(pub)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(derPriv, derPriv2) {
+		t.Error("Marhsalled keys do not match")
+	}
+
+	if !reflect.DeepEqual(derPub, derPub2) {
+		t.Error("Marshalled keys do not match")
+	}
+}
