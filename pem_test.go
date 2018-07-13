@@ -10,12 +10,12 @@ func TestPEMEncodeDecode(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	privPEMEncoded := EncodePrivateKeyX509PEM(prv)
+	privPEMEncoded, _ := EncodePrivateKeyX509PEM(prv)
 	if privPEMEncoded == nil {
 		t.Error("failed to encode private key")
 	}
 
-	pubPEMEncoded := EncodePublicKeyX509PEM(pub)
+	pubPEMEncoded, _ := EncodePublicKeyX509PEM(pub)
 	if pubPEMEncoded == nil {
 		t.Error("failed to encode public key")
 	}

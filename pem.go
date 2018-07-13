@@ -8,29 +8,29 @@ import (
 
 // EncodePrivateKeyX509PEM returns the DER-encoded PEM encoding of the private key
 // returns PEM encoded bytes or nil if there is an error
-func EncodePrivateKeyX509PEM(prv *PrivateKey) []byte {
+func EncodePrivateKeyX509PEM(prv *PrivateKey) ([]byte, error) {
 	x509encoding, err := MarhsalPrivateKeyX509(prv)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: x509encoding})
+	return pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: x509encoding}), nil
 }
 
 // EncodePublicKeyX509PEM returns the DER-encoded PEM encoding of the public key
 // returns PEM encoded bytes or nil if there is an error
-func EncodePublicKeyX509PEM(pubk *PublicKey) []byte {
+func EncodePublicKeyX509PEM(pubk *PublicKey) ([]byte, error) {
 	x509encoding, err := MarshaPublicKeyX509(pubk)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509encoding})
+	return pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509encoding}), nil
 }
 
 // DecodeX509PEM returns a pem block as bytes or nil if no data is found
 func DecodeX509PEM(pemEncoded []byte) ([]byte, error) {
 	block, _ := pem.Decode(pemEncoded)
 	if block == nil {
-		return nil, errors.New("Unable to decode PEM Block data")
+		return nil, ErrDecodeX509PEM
 	}
 	return block.Bytes, nil
 }
@@ -73,20 +73,30 @@ func PublicKeyFromPEMFile(fileName string) (*PublicKey, error) {
 
 // PrivateKeyToPEMFile writes a X509 PEM encoded private key to a file
 func PrivateKeyToPEMFile(fileName string, privateKey *PrivateKey) error {
-	content := EncodePrivateKeyX509PEM(privateKey)
-	if content == nil {
-		return errors.New("Failed to encode private key")
+	content, err := EncodePrivateKeyX509PEM(privateKey)
+	if err != nil {
+		return err
 	}
-	err := ioutil.WriteFile(fileName, content, 0600)
-	return err
+	if content == nil {
+		return ErrPEMContentEmpty
+	}
+	if err := ioutil.WriteFile(fileName, content, 0600); err != nil {
+		return err
+	}
+	return nil
 }
 
 // PublicKeyToPEMFile writes a X509 PEM encoded public key to a file
 func PublicKeyToPEMFile(fileName string, publicKey *PublicKey) error {
-	content := EncodePublicKeyX509PEM(publicKey)
+	content, err := EncodePublicKeyX509PEM(publicKey)
+	if err != nil {
+		return err
+	}
 	if content == nil {
 		return errors.New("Failed to encode private key")
 	}
-	err := ioutil.WriteFile(fileName, content, 0600)
-	return err
+	if err := ioutil.WriteFile(fileName, content, 0600); err != nil {
+		return err
+	}
+	return nil
 }
