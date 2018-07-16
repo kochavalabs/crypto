@@ -1,9 +1,5 @@
 package crypto
 
-import (
-	"encoding/hex"
-)
-
 // AddressLength of address in bytes
 const (
 	AddressLength    = 32
@@ -44,19 +40,14 @@ func AddressFromPublicKey(pubk *PublicKey) (*Address, error) {
 
 // AddressFromHex returns the Address from a hex encoded string or error
 func AddressFromHex(hexEncoded string) (*Address, error) {
-	if hasHexPrefix(hexEncoded) {
-		hexEncoded = hexEncoded[2:] // remove prefix
-	}
-	hashAddress, err := hex.DecodeString(hexEncoded)
+
+	// Hex To Hash is guaranteed to return 32 byte hash cropped from left if needed.
+	hashAddress, err := HexToHash(hexEncoded)
 	if err != nil {
 		return nil, err
 	}
-	address := &Address{}
-	if len(hashAddress) > AddressLength {
-		return nil, ErrInvalidAddressLength
-	}
-	copy(address.hash[AddressLength-len(hashAddress):], hashAddress)
-	return address, nil
+
+	return &Address{hash: hashAddress}, nil
 }
 
 // AddressFromBytes returns the Address from the bytes
@@ -64,10 +55,6 @@ func AddressFromBytes(b []byte) *Address {
 	address := &Address{}
 	address.hash = BytesToHash(b)
 	return address
-}
-
-func hasHexPrefix(str string) bool {
-	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')
 }
 
 // IsHexAddress verifies whether a string can represent a valid hex-encoded

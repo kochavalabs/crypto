@@ -32,7 +32,16 @@ func (h Hash) String() string {
 
 // HexToHash sets byte representation of s to hash.
 // If b is larger than len(h), b will be cropped from the left.
-func HexToHash(s string) Hash { return BytesToHash(FromHex(s)) }
+func HexToHash(s string) (Hash, error) {
+	bytes, err := FromHex(s)
+	if err != nil {
+		return Hash{}, err
+	}
+
+	hash := BytesToHash(bytes)
+
+	return hash, nil
+}
 
 // BytesToHash sets b to hash.
 // If b is larger than len(h), b will be cropped from the left.
@@ -58,22 +67,32 @@ func (h *Hash) SetBytes(b []byte) {
 
 // FromHex returns the bytes represented by the hexadecimal string s.
 // s may be prefixed with "0x".
-func FromHex(s string) []byte {
-	if len(s) > 1 {
-		if s[0:2] == "0x" || s[0:2] == "0X" {
-			s = s[2:]
-		}
+func FromHex(hexEncoded string) ([]byte, error) {
+	if hasHexPrefix(hexEncoded) {
+		hexEncoded = hexEncoded[2:] // remove prefix
 	}
-	if len(s)%2 == 1 {
-		s = "0" + s
+
+	// If there is an odd number of characters prefix with 0 to correct
+	if len(hexEncoded)%2 == 1 {
+		hexEncoded = "0" + hexEncoded
 	}
-	return Hex2Bytes(s)
+
+	hashAddress, err := hex.DecodeString(hexEncoded)
+	if err != nil {
+		return nil, err
+	}
+
+	return hashAddress, nil
 }
 
 // Hex2Bytes returns the bytes represented by the hexadecimal string str.
 func Hex2Bytes(str string) []byte {
 	h, _ := hex.DecodeString(str)
 	return h
+}
+
+func hasHexPrefix(str string) bool {
+	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')
 }
 
 // isHexCharacter returns bool of c being a valid hexadecimal.
