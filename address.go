@@ -12,17 +12,17 @@ const (
 
 // Address represents a 32 byte address
 type Address struct {
-	value [AddressLength]byte
+	hash Hash
 }
 
 // Bytes returns the raw bytes of the address
 func (addr Address) Bytes() []byte {
-	return addr.value[:]
+	return addr.hash.Bytes()
 }
 
 // Hex returns the hex encoded representation of the address bytes
 func (addr Address) Hex() string {
-	return AddressHexPrefix + hex.EncodeToString(addr.value[:])
+	return addr.hash.Hex()
 }
 
 // String implements fmt.Stringer
@@ -38,7 +38,7 @@ func AddressFromPublicKey(pubk *PublicKey) (*Address, error) {
 	}
 	hashAddress := Sha3_256(x509encoded)
 	address := &Address{}
-	copy(address.value[AddressLength-len(hashAddress):], hashAddress)
+	copy(address.hash[AddressLength-len(hashAddress):], hashAddress)
 	return address, nil
 }
 
@@ -55,17 +55,26 @@ func AddressFromHex(hexEncoded string) (*Address, error) {
 	if len(hashAddress) > AddressLength {
 		return nil, ErrInvalidAddressLength
 	}
-	copy(address.value[AddressLength-len(hashAddress):], hashAddress)
+	copy(address.hash[AddressLength-len(hashAddress):], hashAddress)
 	return address, nil
 }
 
 // AddressFromBytes returns the Address from the bytes
 func AddressFromBytes(b []byte) *Address {
 	address := &Address{}
-	copy(address.value[AddressLength-len(b):], b)
+	address.hash = BytesToHash(b)
 	return address
 }
 
 func hasHexPrefix(str string) bool {
 	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')
+}
+
+// IsHexAddress verifies whether a string can represent a valid hex-encoded
+// address or not.
+func IsHexAddress(s string) bool {
+	if hasHexPrefix(s) {
+		s = s[2:]
+	}
+	return len(s) == 2*AddressLength && isHex(s)
 }
