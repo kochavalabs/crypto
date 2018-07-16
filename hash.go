@@ -3,8 +3,6 @@ package crypto
 import (
 	"encoding/hex"
 	"math/big"
-
-	"github.com/kochavalabs/evm/common/hexutil"
 )
 
 // AddressLength of address in bytes
@@ -23,7 +21,15 @@ func (h Hash) Bytes() []byte { return h[:] }
 func (h Hash) Big() *big.Int { return new(big.Int).SetBytes(h[:]) }
 
 // Hex converts a hash to a hex string.
-func (h Hash) Hex() string { return hexutil.Encode(h[:]) }
+func (h Hash) Hex() string { return encode(h[:]) }
+
+// encodes b as a hex string with 0x prefix.
+func encode(b []byte) string {
+	enc := make([]byte, len(b)*2+2)
+	copy(enc, HexPrefix)
+	hex.Encode(enc[2:], b)
+	return string(enc)
+}
 
 // String implements fmt.Stringer
 func (h Hash) String() string {

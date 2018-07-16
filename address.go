@@ -2,8 +2,7 @@ package crypto
 
 // AddressLength of address in bytes
 const (
-	AddressLength    = 32
-	AddressHexPrefix = "0x"
+	AddressLength = 32
 )
 
 // Address represents a 32 byte address
