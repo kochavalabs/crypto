@@ -33,7 +33,7 @@ func AddressFromPublicKey(pubk *PublicKey) (*Address, error) {
 	}
 	hashAddress := Sha3_256(x509encoded)
 	address := &Address{}
-	copy(address.hash[AddressLength-len(hashAddress):], hashAddress)
+	copy(address.hash.value[AddressLength-len(hashAddress):], hashAddress)
 	return address, nil
 }
 
