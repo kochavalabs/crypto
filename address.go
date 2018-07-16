@@ -10,19 +10,18 @@ const (
 	AddressHexPrefix = "0x"
 )
 
-// Address represents the 32 byte address from a sha3_256 hashed x509 encoded EC public key
+// Address represents a 32 byte address
 type Address struct {
-	// hashed value of X509 Marshalled Public Key
 	value [AddressLength]byte
 }
 
 // Bytes returns the raw bytes of the address
-func (addr *Address) Bytes() []byte {
+func (addr Address) Bytes() []byte {
 	return addr.value[:]
 }
 
 // Hex returns the hex encoded representation of the address bytes
-func (addr *Address) Hex() string {
+func (addr Address) Hex() string {
 	return AddressHexPrefix + hex.EncodeToString(addr.value[:])
 }
 
@@ -43,7 +42,7 @@ func AddressFromPublicKey(pubk *PublicKey) (*Address, error) {
 	return address, nil
 }
 
-// AddressFromHex returns the a Address from a hex encoded string or error
+// AddressFromHex returns the Address from a hex encoded string or error
 func AddressFromHex(hexEncoded string) (*Address, error) {
 	if hasHexPrefix(hexEncoded) {
 		hexEncoded = hexEncoded[2:] // remove prefix
@@ -58,6 +57,13 @@ func AddressFromHex(hexEncoded string) (*Address, error) {
 	}
 	copy(address.value[AddressLength-len(hashAddress):], hashAddress)
 	return address, nil
+}
+
+// AddressFromBytes returns the Address from the bytes
+func AddressFromBytes(b []byte) *Address {
+	address := &Address{}
+	copy(address.value[AddressLength-len(b):], b)
+	return address
 }
 
 func hasHexPrefix(str string) bool {
