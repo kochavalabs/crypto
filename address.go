@@ -11,12 +11,12 @@ type Address struct {
 }
 
 // Bytes returns the raw bytes of the address
-func (addr Address) Bytes() []byte {
+func (addr *Address) Bytes() []byte {
 	return addr.hash.Bytes()
 }
 
 // Hex returns the hex encoded representation of the address bytes
-func (addr Address) Hex() string {
+func (addr *Address) Hex() string {
 	return addr.hash.Hex()
 }
 
