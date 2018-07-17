@@ -18,7 +18,7 @@ func Sha3_256(data ...[]byte) []byte {
 
 // Sha256Hash calculates and returns the Sha256 hash of the input data,
 // converting it to an internal Hash data structure.
-func Sha256Hash(data ...[]byte) (h Hash) {
+func Sha3_256ToHash(data ...[]byte) (h Hash) {
 	d := sha3.New256()
 	for _, b := range data {
 		d.Write(b)
