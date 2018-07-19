@@ -6,23 +6,32 @@ const (
 )
 
 // Address represents a 32 byte address
-type Address struct {
-	hash Hash
-}
+type Address [AddressLength]byte
 
 // Bytes returns the raw bytes of the address
-func (addr *Address) Bytes() []byte {
-	return addr.hash.Bytes()
+func (a Address) Bytes() []byte {
+	return a[:]
 }
 
 // Hex returns the hex encoded representation of the address bytes
-func (addr *Address) Hex() string {
-	return addr.hash.Hex()
+// TODO: Include a checksum rule for capitalization?
+func (a Address) Hex() string {
+	return encode(a[:])
 }
 
 // String implements fmt.Stringer
-func (addr Address) String() string {
-	return addr.Hex()
+func (a Address) String() string {
+	return a.Hex()
+}
+
+// SetBytes sets the hash to the value of b.
+// If b is larger than len(h), b will be cropped from the left.
+func (a *Address) SetBytes(b []byte) {
+	if len(b) > len(a) {
+		b = b[len(b)-AddressLength:]
+	}
+
+	copy(a[AddressLength-len(b):], b)
 }
 
 // AddressFromPublicKey returns the address of a EC public key
@@ -33,27 +42,27 @@ func AddressFromPublicKey(pubk *PublicKey) (*Address, error) {
 	}
 	hashAddress := Sha3_256(x509encoded)
 	address := &Address{}
-	copy(address.hash.value[AddressLength-len(hashAddress):], hashAddress)
+	copy(address[AddressLength-len(hashAddress):], hashAddress)
 	return address, nil
 }
 
 // AddressFromHex returns the Address from a hex encoded string or error
-func AddressFromHex(hexEncoded string) (*Address, error) {
-
-	// Hex To Hash is guaranteed to return 32 byte hash cropped from left if needed.
-	hashAddress, err := HexToHash(hexEncoded)
+func AddressFromHex(hexEncoded string) (Address, error) {
+	bytes, err := FromHex(hexEncoded)
 	if err != nil {
-		return nil, err
+		return Address{}, err
 	}
 
-	return &Address{hash: hashAddress}, nil
+	address := AddressFromBytes(bytes)
+
+	return address, nil
 }
 
 // AddressFromBytes returns the Address from the bytes
-func AddressFromBytes(b []byte) *Address {
-	address := &Address{}
-	address.hash = BytesToHash(b)
-	return address
+func AddressFromBytes(b []byte) Address {
+	var a Address
+	a.SetBytes(b)
+	return a
 }
 
 // IsHexAddress verifies whether a string can represent a valid hex-encoded

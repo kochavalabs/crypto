@@ -12,19 +12,17 @@ const (
 )
 
 // Hash represents the 32 byte hash of arbitrary data.
-type Hash struct {
-	value []byte
-}
+type Hash [HashLength]byte
 
 // Bytes gets the byte representation of the underlying hash.
-func (h Hash) Bytes() []byte { return h.value }
+func (h Hash) Bytes() []byte { return h[:] }
 
 // Big converts a hash to a big integer.
-func (h Hash) Big() *big.Int { return new(big.Int).SetBytes(h.value) }
+func (h Hash) Big() *big.Int { return new(big.Int).SetBytes(h[:]) }
 
 // Hex converts a hash to a hex string.
 func (h Hash) Hex() string {
-	return encode(h.value)
+	return encode(h[:])
 }
 
 // encodes b as a hex string with 0x prefix.
@@ -56,9 +54,7 @@ func HexToHash(s string) (Hash, error) {
 // BytesToHash sets b to hash.
 // If b is larger than len(h), b will be cropped from the left.
 func BytesToHash(b []byte) Hash {
-	h := Hash{
-		value: make([]byte, HashLength),
-	}
+	var h Hash
 	h.SetBytes(b)
 	return h
 }
@@ -70,11 +66,11 @@ func BigToHash(b *big.Int) Hash { return BytesToHash(b.Bytes()) }
 // SetBytes sets the hash to the value of b.
 // If b is larger than len(h), b will be cropped from the left.
 func (h *Hash) SetBytes(b []byte) {
-	if len(b) > len(h.value) {
+	if len(b) > len(h) {
 		b = b[len(b)-HashLength:]
 	}
 
-	copy(h.value[HashLength-len(b):], b)
+	copy(h[HashLength-len(b):], b)
 }
 
 // FromHex returns the bytes represented by the hexadecimal string s.
