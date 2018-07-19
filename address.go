@@ -1,34 +1,37 @@
 package crypto
 
-import (
-	"encoding/hex"
-)
-
 // AddressLength of address in bytes
 const (
-	AddressLength    = 32
-	AddressHexPrefix = "0x"
+	AddressLength = 32
 )
 
-// Address represents the 32 byte address from a sha3_256 hashed x509 encoded EC public key
-type Address struct {
-	// hashed value of X509 Marshalled Public Key
-	value [AddressLength]byte
-}
+// Address represents a 32 byte address
+type Address [AddressLength]byte
 
 // Bytes returns the raw bytes of the address
-func (addr *Address) Bytes() []byte {
-	return addr.value[:]
+func (a Address) Bytes() []byte {
+	return a[:]
 }
 
 // Hex returns the hex encoded representation of the address bytes
-func (addr *Address) Hex() string {
-	return AddressHexPrefix + hex.EncodeToString(addr.value[:])
+// TODO: Include a checksum rule for capitalization?
+func (a Address) Hex() string {
+	return encode(a[:])
 }
 
 // String implements fmt.Stringer
-func (addr Address) String() string {
-	return addr.Hex()
+func (a Address) String() string {
+	return a.Hex()
+}
+
+// SetBytes sets the hash to the value of b.
+// If b is larger than len(h), b will be cropped from the left.
+func (a *Address) SetBytes(b []byte) {
+	if len(b) > len(a) {
+		b = b[len(b)-AddressLength:]
+	}
+
+	copy(a[AddressLength-len(b):], b)
 }
 
 // AddressFromPublicKey returns the address of a EC public key
@@ -39,27 +42,34 @@ func AddressFromPublicKey(pubk *PublicKey) (*Address, error) {
 	}
 	hashAddress := Sha3_256(x509encoded)
 	address := &Address{}
-	copy(address.value[AddressLength-len(hashAddress):], hashAddress)
+	copy(address[AddressLength-len(hashAddress):], hashAddress)
 	return address, nil
 }
 
-// AddressFromHex returns the a Address from a hex encoded string or error
-func AddressFromHex(hexEncoded string) (*Address, error) {
-	if hasHexPrefix(hexEncoded) {
-		hexEncoded = hexEncoded[2:] // remove prefix
-	}
-	hashAddress, err := hex.DecodeString(hexEncoded)
+// AddressFromHex returns the Address from a hex encoded string or error
+func AddressFromHex(hexEncoded string) (Address, error) {
+	bytes, err := FromHex(hexEncoded)
 	if err != nil {
-		return nil, err
+		return Address{}, err
 	}
-	address := &Address{}
-	if len(hashAddress) > AddressLength {
-		return nil, ErrInvalidAddressLength
-	}
-	copy(address.value[AddressLength-len(hashAddress):], hashAddress)
+
+	address := AddressFromBytes(bytes)
+
 	return address, nil
 }
 
-func hasHexPrefix(str string) bool {
-	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')
+// AddressFromBytes returns the Address from the bytes
+func AddressFromBytes(b []byte) Address {
+	var a Address
+	a.SetBytes(b)
+	return a
+}
+
+// IsHexAddress verifies whether a string can represent a valid hex-encoded
+// address or not.
+func IsHexAddress(s string) bool {
+	if hasHexPrefix(s) {
+		s = s[2:]
+	}
+	return len(s) == 2*AddressLength && isHex(s)
 }
