@@ -1,5 +1,7 @@
 package crypto
 
+import "fmt"
+
 // AddressLength of address in bytes
 const (
 	AddressLength = 32
@@ -22,6 +24,12 @@ func (a Address) Hex() string {
 // String implements fmt.Stringer
 func (a Address) String() string {
 	return a.Hex()
+}
+
+// Format implements fmt.Formatter, forcing the byte slice to be formatted as is,
+// without going through the stringer interface used for logging.
+func (a Address) Format(s fmt.State, c rune) {
+	fmt.Fprintf(s, "%"+string(c), a[:])
 }
 
 // SetBytes sets the hash to the value of b.
