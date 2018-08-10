@@ -4,7 +4,7 @@ import "fmt"
 
 // AddressLength of address in bytes
 const (
-	AddressLength = 32
+	AddressLength = 20
 )
 
 // Address represents a 32 byte address
@@ -50,7 +50,7 @@ func AddressFromPublicKey(pubk *PublicKey) (*Address, error) {
 	}
 	hashAddress := Sha3_256(x509encoded)
 	address := &Address{}
-	copy(address[AddressLength-len(hashAddress):], hashAddress)
+	address.SetBytes(hashAddress)
 	return address, nil
 }
 
