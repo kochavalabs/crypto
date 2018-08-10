@@ -20,7 +20,7 @@ func TestAddress(t *testing.T) {
 		t.Error(err)
 	}
 
-	if !reflect.DeepEqual(address, address2) {
-		t.Error("address do not match")
+	if !reflect.DeepEqual(*address, address2) {
+		t.Errorf("addresses do not match, eppected: [%v] got: [%v]", address, address2)
 	}
 }
