@@ -11,4 +11,7 @@ var (
 
 	// ErrDecodeX509PEM defines a generic key for failing to decode a PEM block
 	ErrDecodeX509PEM = errors.New("Unable to decode PEM Block data")
+
+	// ErrSyntax occurs when decoding an invalid string
+	ErrSyntax = errors.New("invalid hex string")
 )
