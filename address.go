@@ -1,10 +1,19 @@
 package crypto
 
-import "fmt"
+import (
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"reflect"
+)
 
 // AddressLength of address in bytes
 const (
 	AddressLength = 20
+)
+
+var (
+	addressT = reflect.TypeOf(Address{})
 )
 
 // Address represents a 32 byte address
@@ -80,4 +89,60 @@ func IsHexAddress(s string) bool {
 		s = s[2:]
 	}
 	return len(s) == 2*AddressLength && isHex(s)
+}
+
+// MarshalText returns the hex representation of an Address.
+func (a Address) MarshalText() ([]byte, error) {
+	b := a.Bytes()
+	result := make([]byte, len(b)*2+2)
+	copy(result, `0x`)
+	hex.Encode(result[2:], b)
+	return result, nil
+}
+
+// UnmarshalText parses a hash in hex syntax.
+func (a *Address) UnmarshalText(input []byte) error {
+	out := a[:]
+
+	if len(input) == 0 {
+		return nil // empty strings are allowed
+	} else if len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X') {
+		input = input[2:] // Remove prefix if found
+	}
+
+	if len(input)/2 != len(out) {
+		return fmt.Errorf("hex string has length %d, want %d for %s", len(input), len(out)*2, "Address")
+	}
+	// Pre-verify syntax before modifying out.
+	for _, b := range input {
+		if decodeNibble(b) == badNibble {
+			return ErrSyntax
+		}
+	}
+	hex.Decode(out, input)
+	return nil
+}
+
+// UnmarshalJSON parses a hash in hex syntax.
+func (a *Address) UnmarshalJSON(input []byte) error {
+	// Check if string
+	if !(len(input) >= 2 && input[0] == '"' && input[len(input)-1] == '"') {
+		return &json.UnmarshalTypeError{Value: "non-string", Type: addressT}
+	}
+	return a.UnmarshalText(input[1 : len(input)-1])
+}
+
+const badNibble = ^uint64(0)
+
+func decodeNibble(in byte) uint64 {
+	switch {
+	case in >= '0' && in <= '9':
+		return uint64(in - '0')
+	case in >= 'A' && in <= 'F':
+		return uint64(in - 'A' + 10)
+	case in >= 'a' && in <= 'f':
+		return uint64(in - 'a' + 10)
+	default:
+		return badNibble
+	}
 }
