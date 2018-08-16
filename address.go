@@ -100,12 +100,12 @@ func (a Address) MarshalText() ([]byte, error) {
 	return result, nil
 }
 
-// UnmarshalText parses a hash in hex syntax.
+// UnmarshalText parses an address in hex syntax.
 func (a *Address) UnmarshalText(input []byte) error {
 	out := a[:]
 
 	if len(input) == 0 {
-		return nil // empty strings are allowed
+		// Skip removing prefix
 	} else if len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X') {
 		input = input[2:] // Remove prefix if found
 	}
@@ -123,12 +123,13 @@ func (a *Address) UnmarshalText(input []byte) error {
 	return nil
 }
 
-// UnmarshalJSON parses a hash in hex syntax.
+// UnmarshalJSON parses an address in hex syntax.
 func (a *Address) UnmarshalJSON(input []byte) error {
 	// Check if string
 	if !(len(input) >= 2 && input[0] == '"' && input[len(input)-1] == '"') {
 		return &json.UnmarshalTypeError{Value: "non-string", Type: addressT}
 	}
+
 	return a.UnmarshalText(input[1 : len(input)-1])
 }
 
