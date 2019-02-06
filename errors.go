@@ -3,9 +3,6 @@ package crypto
 import "errors"
 
 var (
-	// ErrInvalidAddressLength defines a generic key for address lengths
-	ErrInvalidAddressLength = errors.New("Invaild Address Length")
-
 	// ErrPEMContentEmpty defines a generic key for Pem block empty
 	ErrPEMContentEmpty = errors.New("PEM Block is empty")
 
