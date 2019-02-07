@@ -50,7 +50,8 @@ func TestSignatureVerification(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.in, func(t *testing.T) {
-			hash := Sha3_256([]byte(tt.in))
+			hasher := Sha3_256Hasher{}
+			hash := hasher.Hash([]byte(tt.in))
 			sig, err := prv.Sign(hash)
 			if err != nil {
 				t.Error("Failed to sign hash with private key", err)
@@ -72,7 +73,8 @@ func TestIncorrectPublicKey(t *testing.T) {
 		t.Error("Failed to generate keys using P256 ellipitic curve", err)
 	}
 
-	hash := Sha3_256([]byte("test"))
+	hasher := Sha3_256Hasher{}
+	hash := hasher.Hash([]byte("test"))
 	sig, err := prv.Sign(hash)
 	if err != nil {
 		t.Error("Failed to sign hash with private key", err)
@@ -90,7 +92,8 @@ func TestNonDeterministic(t *testing.T) {
 		t.Error("Failed to generate keys using P256 ellipitic curve", err)
 	}
 
-	hash := Sha3_256([]byte("test"))
+	hasher := Sha3_256Hasher{}
+	hash := hasher.Hash([]byte("test"))
 	sig1, err := prv.Sign(hash)
 	if err != nil {
 		t.Error("Failed to sign hash with private key", err)
