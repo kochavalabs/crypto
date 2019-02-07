@@ -41,3 +41,22 @@ func (h *MockHasher) Hash(input ...[]byte) []byte {
 func (h *MockHasher) HashHex(input ...[]byte) string {
 	return h.hex
 }
+
+// A Generic hasher that can implement the hasher interface when supplied with
+// a golang standard library hash function.
+// Any hasher created with this will not be thread safe.
+type GenericHasher struct {
+	hashFunc hash.Hash
+}
+
+func (h *GenericHasher) Hash(input ...[]byte) []byte {
+	result := hashBytes(h.hashFunc, input...)
+	h.hashFunc.Reset()
+	return result
+}
+
+func (h *GenericHasher) HashHex(input ...[]byte) string {
+	result := hashHex(h.hashFunc, input...)
+	h.hashFunc.Reset()
+	return result
+}
