@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"crypto/ecdsa"
 	"encoding/pem"
 	"errors"
 	"io/ioutil"
@@ -8,7 +9,7 @@ import (
 
 // EncodePrivateKeyX509PEM returns the DER-encoded PEM encoding of the private key
 // returns PEM encoded bytes or nil if there is an error
-func EncodePrivateKeyX509PEM(prv *PrivateKey) ([]byte, error) {
+func EncodePrivateKeyX509PEM(prv *ecdsa.PrivateKey) ([]byte, error) {
 	x509encoding, err := MarhsalPrivateKeyX509(prv)
 	if err != nil {
 		return nil, err
@@ -18,7 +19,7 @@ func EncodePrivateKeyX509PEM(prv *PrivateKey) ([]byte, error) {
 
 // EncodePublicKeyX509PEM returns the DER-encoded PEM encoding of the public key
 // returns PEM encoded bytes or nil if there is an error
-func EncodePublicKeyX509PEM(pubk *PublicKey) ([]byte, error) {
+func EncodePublicKeyX509PEM(pubk *ecdsa.PublicKey) ([]byte, error) {
 	x509encoding, err := MarshaPublicKeyX509(pubk)
 	if err != nil {
 		return nil, err
@@ -37,7 +38,7 @@ func DecodeX509PEM(pemEncoded []byte) ([]byte, error) {
 
 // PrivateKeyFromPEMFile reads a X509 PEM encoded private key from file
 // returns a private key or error
-func PrivateKeyFromPEMFile(fileName string) (*PrivateKey, error) {
+func PrivateKeyFromPEMFile(fileName string) (*ecdsa.PrivateKey, error) {
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func PrivateKeyFromPEMFile(fileName string) (*PrivateKey, error) {
 
 // PublicKeyFromPEMFile reads a X509 PEM encoded public key from file
 // returns a public key or error
-func PublicKeyFromPEMFile(fileName string) (*PublicKey, error) {
+func PublicKeyFromPEMFile(fileName string) (*ecdsa.PublicKey, error) {
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return nil, err
@@ -72,7 +73,7 @@ func PublicKeyFromPEMFile(fileName string) (*PublicKey, error) {
 }
 
 // PrivateKeyToPEMFile writes a X509 PEM encoded private key to a file
-func PrivateKeyToPEMFile(fileName string, privateKey *PrivateKey) error {
+func PrivateKeyToPEMFile(fileName string, privateKey *ecdsa.PrivateKey) error {
 	content, err := EncodePrivateKeyX509PEM(privateKey)
 	if err != nil {
 		return err
@@ -87,7 +88,7 @@ func PrivateKeyToPEMFile(fileName string, privateKey *PrivateKey) error {
 }
 
 // PublicKeyToPEMFile writes a X509 PEM encoded public key to a file
-func PublicKeyToPEMFile(fileName string, publicKey *PublicKey) error {
+func PublicKeyToPEMFile(fileName string, publicKey *ecdsa.PublicKey) error {
 	content, err := EncodePublicKeyX509PEM(publicKey)
 	if err != nil {
 		return err
