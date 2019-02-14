@@ -141,7 +141,7 @@ func NewP256Sha3_256Verifyer(pubData []byte) (Verifyer, error) {
 		return nil, errors.New(errorMsg)
 	}
 	return getVerifyer(
-		elliptic.P256(), pubData, &Sha_256Hasher{}, "ecdsa_P256_sha3-256",
+		elliptic.P256(), pubData, &Sha3_256Hasher{}, "ecdsa_P256_sha3-256",
 	), nil
 }
 
@@ -152,7 +152,7 @@ func NewP256Sha3_256DetSigner(privData []byte) (Signer, error) {
 			len(privData))
 		return nil, errors.New(errorMsg)
 	}
-	hasher := &Sha_256Hasher{}
+	hasher := &Sha3_256Hasher{}
 	return getSigner(
 		elliptic.P256(),
 		privData,
@@ -169,7 +169,7 @@ func NewP256Sha3_256InDetSigner(privData []byte) (Signer, error) {
 			len(privData))
 		return nil, errors.New(errorMsg)
 	}
-	hasher := &Sha_256Hasher{}
+	hasher := &Sha3_256Hasher{}
 	return getSigner(
 		elliptic.P256(),
 		privData,
