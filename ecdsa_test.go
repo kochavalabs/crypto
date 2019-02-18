@@ -230,6 +230,10 @@ var constructorTestCases = []struct {
 	{NewP256Sha3_256DetSigner, NewP256Sha3_256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, true},
 	{NewP256Sha3_256InDetSigner, NewP256Sha3_256Verifyer, P256PubHex, P256PrivHex, nil, false},
 	{NewP256Sha3_256InDetSigner, NewP256Sha3_256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, false},
+	{NewP256Shake256DetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, nil, true},
+	{NewP256Shake256DetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, true},
+	{NewP256Shake256InDetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, nil, false},
+	{NewP256Shake256InDetSigner, NewP256SShake256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, false},
 }
 
 func TestEcdsaConstructorPairSuccess(t *testing.T) {

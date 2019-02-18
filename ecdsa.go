@@ -179,6 +179,52 @@ func NewP256Sha3_256InDetSigner(privData []byte) (Signer, error) {
 	), nil
 }
 
+func NewP256Shake256Verifyer(pubData []byte) (Verifyer, error) {
+	if len(pubData) != 64 {
+		errorMsg := fmt.Sprintf(
+			"Bad keydata passed to verifyer, expected 64 bytes, got %d bytes",
+			len(pubData))
+		return nil, errors.New(errorMsg)
+	}
+	return getVerifyer(
+		elliptic.P256(), pubData, &Shake256Hasher{}, "ecdsa_P256_shake256",
+	), nil
+}
+
+func NewP256Shake256DetSigner(privData []byte) (Signer, error) {
+	if len(privData) != 32 {
+		errorMsg := fmt.Sprintf(
+			"Bad keydata passed to verifyer, expected 32 bytes, got %d bytes",
+			len(privData))
+		return nil, errors.New(errorMsg)
+	}
+	hasher := &Shake256Hasher{}
+	return getSigner(
+		elliptic.P256(),
+		privData,
+		hasher,
+		newDeterministicReader,
+		"ecdsa_P256_shake256_det",
+	), nil
+}
+
+func NewP256Shake256InDetSigner(privData []byte) (Signer, error) {
+	if len(privData) != 32 {
+		errorMsg := fmt.Sprintf(
+			"Bad keydata passed to verifyer, expected 32 bytes, got %d bytes",
+			len(privData))
+		return nil, errors.New(errorMsg)
+	}
+	hasher := &Shake256Hasher{}
+	return getSigner(
+		elliptic.P256(),
+		privData,
+		hasher,
+		newRandomReader,
+		"ecdsa_P256_shake256_indet",
+	), nil
+}
+
 // GenerateKeyPairP256 create a private/public key pair using the P256 elliptic curve
 func GenerateKeyPairP256() (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
 	prvKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
