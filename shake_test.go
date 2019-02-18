@@ -38,3 +38,11 @@ func TestShakeHasherHash(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkShake256(b *testing.B) {
+	hasher := Shake256Hasher{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hasher.Hash([]byte("qwerty"))
+	}
+}
