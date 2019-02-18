@@ -50,3 +50,35 @@ func TestShaHasherHash(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkSha3_256(b *testing.B) {
+	hasher := Sha3_256Hasher{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hasher.Hash([]byte("qwerty"))
+	}
+}
+
+func BenchmarkSha3_512(b *testing.B) {
+	hasher := Sha3_512Hasher{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hasher.Hash([]byte("qwerty"))
+	}
+}
+
+func BenchmarkSha_256(b *testing.B) {
+	hasher := Sha_256Hasher{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hasher.Hash([]byte("qwerty"))
+	}
+}
+
+func BenchmarkSha_512(b *testing.B) {
+	hasher := Sha_512Hasher{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hasher.Hash([]byte("qwerty"))
+	}
+}
