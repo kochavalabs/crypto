@@ -6,46 +6,24 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"io"
 	"math/big"
 )
+
+// GenerateKeyPairP256 create a private/public key pair using the P256 elliptic
+// curve
+func GenerateKeyPairP256() (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
+	prvKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return nil, nil, err
+	}
+	return prvKey, &prvKey.PublicKey, nil
+}
 
 func splitByteSlice(toSplit []byte) (*big.Int, *big.Int) {
 	l := len(toSplit)
 	left := new(big.Int).SetBytes(toSplit[:l/2])
 	right := new(big.Int).SetBytes(toSplit[l/2:])
 	return left, right
-}
-
-type newReader func(hasher Hasher, messageHash []byte, privKey *ecdsa.PrivateKey) io.Reader
-
-func newDeterministicReader(hasher Hasher, messageHash []byte, privKey *ecdsa.PrivateKey) io.Reader {
-	return &deterministicReader{
-		hasher:      hasher,
-		messageHash: messageHash,
-		privKey:     privKey,
-	}
-}
-
-func newRandomReader(hasher Hasher, messageHash []byte, privKey *ecdsa.PrivateKey) io.Reader {
-	return rand.Reader
-}
-
-type deterministicReader struct {
-	hasher      Hasher
-	messageHash []byte
-	privKey     *ecdsa.PrivateKey
-}
-
-func (r *deterministicReader) Read(p []byte) (n int, err error) {
-	digest := r.hasher.Hash(r.messageHash, r.privKey.D.Bytes())
-	if len(digest) < len(p) {
-		return 0, errors.New("Missmatch between entropy length and hash length.")
-	}
-	for i, _ := range p {
-		p[i] = digest[i]
-	}
-	return len(p), nil
 }
 
 type EcdsaVerifyer struct {
@@ -73,7 +51,7 @@ type EcdsaSigner struct {
 
 func (s *EcdsaSigner) Sign(toSign Hashable) ([]byte, error) {
 	messageHash := toSign.Hash(s.hasher)
-	reader := s.reader(s.hasher, messageHash, &s.privateKey)
+	reader := s.reader(s.hasher, messageHash, s.privateKey.D.Bytes())
 	R, S, err := ecdsa.Sign(reader, &s.privateKey, messageHash)
 	if err != nil {
 		return nil, err
@@ -223,13 +201,4 @@ func NewP256Shake256InDetSigner(privData []byte) (Signer, error) {
 		newRandomReader,
 		"ecdsa_P256_shake256_indet",
 	), nil
-}
-
-// GenerateKeyPairP256 create a private/public key pair using the P256 elliptic curve
-func GenerateKeyPairP256() (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
-	prvKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		return nil, nil, err
-	}
-	return prvKey, &prvKey.PublicKey, nil
 }

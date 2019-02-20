@@ -24,7 +24,7 @@ func (r *fixedReader) Read(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func newAllBytesEight(hasher Hasher, messageHash []byte, privKey *ecdsa.PrivateKey) io.Reader {
+func newAllBytesEight(hasher Hasher, messageHash []byte, privKey []byte) io.Reader {
 	return &fixedReader{
 		value: 8,
 	}
@@ -233,7 +233,7 @@ var constructorTestCases = []struct {
 	{NewP256Shake256DetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, nil, true},
 	{NewP256Shake256DetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, true},
 	{NewP256Shake256InDetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, nil, false},
-	{NewP256Shake256InDetSigner, NewP256SShake256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, false},
+	{NewP256Shake256InDetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, false},
 }
 
 func TestEcdsaConstructorPairSuccess(t *testing.T) {
