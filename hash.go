@@ -65,6 +65,12 @@ func (h *GenericHasher) HashHex(input ...[]byte) string {
 	return result
 }
 
+func NewByteHashable(toHash []byte) Hashable {
+	return &ByteHashable{
+		toHash: toHash,
+	}
+}
+
 // A basic hashable type from a simple byte slice.
 type ByteHashable struct {
 	toHash []byte
