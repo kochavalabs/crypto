@@ -9,6 +9,12 @@ import (
 	"math/big"
 )
 
+const (
+	P256PrivateKeyLength = 32
+	P256PublicKeyLength  = 64
+	P256SignatureLength  = 64
+)
+
 // GenerateKeyPairP256 create a private/public key pair using the P256 elliptic
 // curve
 func GenerateKeyPairP256() (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
