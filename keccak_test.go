@@ -38,3 +38,11 @@ func TestKeccakHasherHash(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkKeccak256(b *testing.B) {
+	hasher := Keccak256Hasher{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hasher.Hash([]byte("qwerty"))
+	}
+}
