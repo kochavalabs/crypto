@@ -32,25 +32,25 @@ func splitByteSlice(toSplit []byte) (*big.Int, *big.Int) {
 	return left, right
 }
 
-type EcdsaVerifyer struct {
+type EcdsaVerifier struct {
 	publicKey *ecdsa.PublicKey
 	hasher    Hasher
 	suiteType string
 }
 
-func (s *EcdsaVerifyer) Verify(toVerify Hashable, signature []byte) bool {
+func (s *EcdsaVerifier) Verify(toVerify Hashable, signature []byte) bool {
 	messageHash := toVerify.Hash(s.hasher)
 	R, S := splitByteSlice(signature)
 	return ecdsa.Verify(s.publicKey, messageHash, R, S)
 }
 
-func (s *EcdsaVerifyer) SuiteType() string {
+func (s *EcdsaVerifier) SuiteType() string {
 	return s.suiteType
 }
 
 type EcdsaSigner struct {
 	hasher     Hasher
-	verifyer   *EcdsaVerifyer
+	verifier   *EcdsaVerifier
 	reader     newReader
 	privateKey ecdsa.PrivateKey
 }
@@ -66,28 +66,28 @@ func (s *EcdsaSigner) Sign(toSign Hashable) ([]byte, error) {
 }
 
 func (s *EcdsaSigner) Verify(toVerify Hashable, signature []byte) bool {
-	return s.verifyer.Verify(toVerify, signature)
+	return s.verifier.Verify(toVerify, signature)
 }
 
 func (s *EcdsaSigner) SuiteType() string {
-	return s.verifyer.SuiteType()
+	return s.verifier.SuiteType()
 }
 
-// Convenience function for creating verifyers. Used in functions such as
+// Convenience function for creating verifiers. Used in functions such as
 // NewP256Sha3_256DetSigner
-func getVerifyer(
+func getVerifier(
 	curve elliptic.Curve,
 	pubData []byte,
 	hasher Hasher,
 	suiteType string,
-) *EcdsaVerifyer {
+) *EcdsaVerifier {
 	X, Y := splitByteSlice(pubData)
 	pubKey := ecdsa.PublicKey{
 		X:     X,
 		Y:     Y,
 		Curve: curve,
 	}
-	return &EcdsaVerifyer{
+	return &EcdsaVerifier{
 		hasher:    hasher,
 		publicKey: &pubKey,
 		suiteType: suiteType,
@@ -113,18 +113,18 @@ func getSigner(
 		hasher:     hasher,
 		reader:     reader,
 		privateKey: *privKey,
-		verifyer:   getVerifyer(curve, pubData, hasher, suiteType),
+		verifier:   getVerifier(curve, pubData, hasher, suiteType),
 	}
 }
 
-func NewP256Sha3_256Verifyer(pubData []byte) (Verifyer, error) {
+func NewP256Sha3_256Verifier(pubData []byte) (Verifier, error) {
 	if len(pubData) != 64 {
 		errorMsg := fmt.Sprintf(
-			"Bad keydata passed to verifyer, expected 64 bytes, got %d bytes",
+			"Bad keydata passed to verifier, expected 64 bytes, got %d bytes",
 			len(pubData))
 		return nil, errors.New(errorMsg)
 	}
-	return getVerifyer(
+	return getVerifier(
 		elliptic.P256(), pubData, &Sha3_256Hasher{}, "ecdsa_P256_sha3-256",
 	), nil
 }
@@ -132,7 +132,7 @@ func NewP256Sha3_256Verifyer(pubData []byte) (Verifyer, error) {
 func NewP256Sha3_256DetSigner(privData []byte) (Signer, error) {
 	if len(privData) != 32 {
 		errorMsg := fmt.Sprintf(
-			"Bad keydata passed to verifyer, expected 32 bytes, got %d bytes",
+			"Bad keydata passed to verifier, expected 32 bytes, got %d bytes",
 			len(privData))
 		return nil, errors.New(errorMsg)
 	}
@@ -149,7 +149,7 @@ func NewP256Sha3_256DetSigner(privData []byte) (Signer, error) {
 func NewP256Sha3_256InDetSigner(privData []byte) (Signer, error) {
 	if len(privData) != 32 {
 		errorMsg := fmt.Sprintf(
-			"Bad keydata passed to verifyer, expected 32 bytes, got %d bytes",
+			"Bad keydata passed to verifier, expected 32 bytes, got %d bytes",
 			len(privData))
 		return nil, errors.New(errorMsg)
 	}
@@ -163,14 +163,14 @@ func NewP256Sha3_256InDetSigner(privData []byte) (Signer, error) {
 	), nil
 }
 
-func NewP256Shake256Verifyer(pubData []byte) (Verifyer, error) {
+func NewP256Shake256Verifier(pubData []byte) (Verifier, error) {
 	if len(pubData) != 64 {
 		errorMsg := fmt.Sprintf(
-			"Bad keydata passed to verifyer, expected 64 bytes, got %d bytes",
+			"Bad keydata passed to verifier, expected 64 bytes, got %d bytes",
 			len(pubData))
 		return nil, errors.New(errorMsg)
 	}
-	return getVerifyer(
+	return getVerifier(
 		elliptic.P256(), pubData, &Shake256Hasher{}, "ecdsa_P256_shake256",
 	), nil
 }
@@ -178,7 +178,7 @@ func NewP256Shake256Verifyer(pubData []byte) (Verifyer, error) {
 func NewP256Shake256DetSigner(privData []byte) (Signer, error) {
 	if len(privData) != 32 {
 		errorMsg := fmt.Sprintf(
-			"Bad keydata passed to verifyer, expected 32 bytes, got %d bytes",
+			"Bad keydata passed to verifier, expected 32 bytes, got %d bytes",
 			len(privData))
 		return nil, errors.New(errorMsg)
 	}
@@ -195,7 +195,7 @@ func NewP256Shake256DetSigner(privData []byte) (Signer, error) {
 func NewP256Shake256InDetSigner(privData []byte) (Signer, error) {
 	if len(privData) != 32 {
 		errorMsg := fmt.Sprintf(
-			"Bad keydata passed to verifyer, expected 32 bytes, got %d bytes",
+			"Bad keydata passed to verifier, expected 32 bytes, got %d bytes",
 			len(privData))
 		return nil, errors.New(errorMsg)
 	}
