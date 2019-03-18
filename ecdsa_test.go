@@ -40,7 +40,7 @@ var signingTestCases = []struct {
 
 func TestEcdsSignerSuiteType(t *testing.T) {
 	signer := EcdsaSigner{
-		verifyer: &EcdsaVerifyer{suiteType: "Test"},
+		verifier: &EcdsaVerifier{suiteType: "Test"},
 	}
 	expected := "Test"
 	result := signer.SuiteType()
@@ -87,7 +87,7 @@ func TestEcdsaSignerVerifyPass(t *testing.T) {
 				hasher:     hasher,
 				reader:     newAllBytesEight,
 				privateKey: *testKey,
-				verifyer: &EcdsaVerifyer{
+				verifier: &EcdsaVerifier{
 					publicKey: &testKey.PublicKey,
 					hasher:    hasher,
 				},
@@ -114,7 +114,7 @@ func TestEcdsaSignerVerifyFailBadSignature(t *testing.T) {
 				hasher:     hasher,
 				reader:     newAllBytesEight,
 				privateKey: *testKey,
-				verifyer: &EcdsaVerifyer{
+				verifier: &EcdsaVerifier{
 					publicKey: &testKey.PublicKey,
 					hasher:    hasher,
 				},
@@ -142,7 +142,7 @@ func TestEcdsaSignerVerifyFailMismatchHasher(t *testing.T) {
 				hasher:     hasher,
 				reader:     newAllBytesEight,
 				privateKey: *testKey,
-				verifyer: &EcdsaVerifyer{
+				verifier: &EcdsaVerifier{
 					publicKey: &testKey.PublicKey,
 					hasher:    &Sha_256Hasher{},
 				},
@@ -171,7 +171,7 @@ func TestEcdsaSignerVerifyFailBadKey(t *testing.T) {
 				hasher:     hasher,
 				reader:     newAllBytesEight,
 				privateKey: *testKey,
-				verifyer: &EcdsaVerifyer{
+				verifier: &EcdsaVerifier{
 					publicKey: &badKey.PublicKey,
 					hasher:    hasher,
 				},
@@ -199,7 +199,7 @@ func TestEcdsaSignerVerifyFailBadMessage(t *testing.T) {
 				hasher:     hasher,
 				reader:     newAllBytesEight,
 				privateKey: *testKey,
-				verifyer: &EcdsaVerifyer{
+				verifier: &EcdsaVerifier{
 					publicKey: &testKey.PublicKey,
 					hasher:    hasher,
 				},
@@ -220,20 +220,20 @@ func TestEcdsaSignerVerifyFailBadMessage(t *testing.T) {
 
 var constructorTestCases = []struct {
 	signerNew     func([]byte) (Signer, error)
-	verifyerNew   func([]byte) (Verifyer, error)
+	verifierNew   func([]byte) (Verifier, error)
 	pubKeyHex     string
 	privKeyHex    string
 	message       []byte
 	deterministic bool
 }{
-	{NewP256Sha3_256DetSigner, NewP256Sha3_256Verifyer, P256PubHex, P256PrivHex, nil, true},
-	{NewP256Sha3_256DetSigner, NewP256Sha3_256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, true},
-	{NewP256Sha3_256InDetSigner, NewP256Sha3_256Verifyer, P256PubHex, P256PrivHex, nil, false},
-	{NewP256Sha3_256InDetSigner, NewP256Sha3_256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, false},
-	{NewP256Shake256DetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, nil, true},
-	{NewP256Shake256DetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, true},
-	{NewP256Shake256InDetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, nil, false},
-	{NewP256Shake256InDetSigner, NewP256Shake256Verifyer, P256PubHex, P256PrivHex, []byte{1, 2}, false},
+	{NewP256Sha3_256DetSigner, NewP256Sha3_256Verifier, P256PubHex, P256PrivHex, nil, true},
+	{NewP256Sha3_256DetSigner, NewP256Sha3_256Verifier, P256PubHex, P256PrivHex, []byte{1, 2}, true},
+	{NewP256Sha3_256InDetSigner, NewP256Sha3_256Verifier, P256PubHex, P256PrivHex, nil, false},
+	{NewP256Sha3_256InDetSigner, NewP256Sha3_256Verifier, P256PubHex, P256PrivHex, []byte{1, 2}, false},
+	{NewP256Shake256DetSigner, NewP256Shake256Verifier, P256PubHex, P256PrivHex, nil, true},
+	{NewP256Shake256DetSigner, NewP256Shake256Verifier, P256PubHex, P256PrivHex, []byte{1, 2}, true},
+	{NewP256Shake256InDetSigner, NewP256Shake256Verifier, P256PubHex, P256PrivHex, nil, false},
+	{NewP256Shake256InDetSigner, NewP256Shake256Verifier, P256PubHex, P256PrivHex, []byte{1, 2}, false},
 }
 
 func TestEcdsaConstructorPairSuccess(t *testing.T) {
@@ -243,13 +243,13 @@ func TestEcdsaConstructorPairSuccess(t *testing.T) {
 			privKey, _ := FromHex(tt.privKeyHex)
 			pubKey, _ := FromHex(tt.pubKeyHex)
 			signer, errConSign := tt.signerNew(privKey)
-			verifyer, errConVer := tt.verifyerNew(pubKey)
+			verifier, errConVer := tt.verifierNew(pubKey)
 			message := &ByteHashable{toHash: tt.message}
 
-			if !strings.HasPrefix(signer.SuiteType(), verifyer.SuiteType()) {
+			if !strings.HasPrefix(signer.SuiteType(), verifier.SuiteType()) {
 				t.Errorf(
-					"Different suite type: Verifyer=%s Signer=%s",
-					verifyer.SuiteType(),
+					"Different suite type: Verifier=%s Signer=%s",
+					verifier.SuiteType(),
 					signer.SuiteType())
 			}
 
@@ -280,12 +280,12 @@ func TestEcdsaConstructorPairSuccess(t *testing.T) {
 				t.Errorf("Signer didn't verify signature2 for its own message.")
 			}
 
-			if !verifyer.Verify(message, signature1) {
-				t.Errorf("Verifyer didn't verify signature1 for for signer.")
+			if !verifier.Verify(message, signature1) {
+				t.Errorf("Verifier didn't verify signature1 for for signer.")
 			}
 
-			if !verifyer.Verify(message, signature2) {
-				t.Errorf("Verifyer didn't verify signature2 for for signer.")
+			if !verifier.Verify(message, signature2) {
+				t.Errorf("Verifier didn't verify signature2 for for signer.")
 			}
 
 			if reflect.DeepEqual(signature1, signature2) != tt.deterministic {
