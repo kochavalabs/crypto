@@ -27,17 +27,17 @@ func GenerateCurve25519KeyPair() ([32]byte, [32]byte, error) {
 	return priK, pubK, nil
 }
 
-type Curve25519Verifyer struct {
+type Curve25519Verifier struct {
 	publicKey [32]byte
 	hasher    Hasher
 	suiteType string
 }
 
-func (s *Curve25519Verifyer) SuiteType() string {
+func (s *Curve25519Verifier) SuiteType() string {
 	return s.suiteType
 }
 
-func (s *Curve25519Verifyer) Verify(toVerify Hashable, signature []byte) bool {
+func (s *Curve25519Verifier) Verify(toVerify Hashable, signature []byte) bool {
 	messageHash := toVerify.Hash(s.hasher)
 	if len(signature) != 64 {
 		return false
@@ -48,7 +48,7 @@ func (s *Curve25519Verifyer) Verify(toVerify Hashable, signature []byte) bool {
 type Curve25519Signer struct {
 	hasher   Hasher
 	privKey  [32]byte
-	verifyer *Curve25519Verifyer
+	verifier *Curve25519Verifier
 	reader   newReader
 }
 
@@ -59,5 +59,5 @@ func (s *Curve25519Signer) Sign(toSign Hashable) ([]byte, error) {
 }
 
 func (s *Curve25519Signer) SuiteType() string {
-	return s.verifyer.SuiteType()
+	return s.verifier.SuiteType()
 }
