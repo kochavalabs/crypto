@@ -1,26 +1,57 @@
 package crypto
 
-// A signer/verifier should return some information about what type of signature
+// Suite signer/verifier should return some information about what type of signature
 // it is generating. An example may be ecdsa_p256_keccak256 indicating an
 // eliptic curve signing algorithm using curve p256 and hashing with
 // keccak256.
-type CryptoSuite interface {
+type Suite interface {
 	SuiteType() string
 }
 
-// Abstraction around verifying signatures. This can be a useful abstraction
+// Verifier abstraction around verifying signatures. This can be a useful abstraction
 // if you don't particularly care about the key/signature format but simply want
 // to create a cryptographic verifier of a certin type.
 type Verifier interface {
-	CryptoSuite
+	Suite
 	Verify(toVerify Hashable, signature []byte) bool
 }
 
-// Abstraction around signing. This can be a useful abstraction if you don't
+// Signer abstraction around signing. This can be a useful abstraction if you don't
 // particularly care about the key/signature format but simply want to create a
 // cryptographic signer of a certin type. We assume that if you can sign that
 // you can also verify (especially in the case of ecdsa.)
 type Signer interface {
 	Verifier
 	Sign(toSign Hashable) ([]byte, error)
+}
+
+// MockSigner mock of the signier interface.
+type MockSigner struct {
+	Suite string
+
+	ToVerify  Hashable
+	Signature []byte
+	VerifyRet bool
+
+	ToSign     Hashable
+	SignSigRet []byte
+	SignErrRet error
+}
+
+// Sign mock.
+func (s *MockSigner) Sign(toSign Hashable) ([]byte, error) {
+	s.ToSign = toSign
+	return s.SignSigRet, s.SignErrRet
+}
+
+// Verify mock.
+func (s *MockSigner) Verify(toVerify Hashable, signature []byte) bool {
+	s.ToVerify = toVerify
+	s.Signature = signature
+	return s.VerifyRet
+}
+
+// SuiteType mock.
+func (s *MockSigner) SuiteType() string {
+	return s.Suite
 }
