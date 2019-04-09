@@ -61,7 +61,7 @@ func TestEcdsaSignerSign(t *testing.T) {
 				privateKey: *testKey,
 			}
 
-			result, err := signer.Sign(&ByteHashable{toHash: tt.message})
+			result, err := signer.Sign(tt.message)
 			r, s, _ := ecdsa.Sign(allBytesEight, testKey, hasher.Hash(tt.message))
 			expected := append(r.Bytes(), s.Bytes()...)
 
@@ -96,7 +96,7 @@ func TestEcdsaSignerVerifyPass(t *testing.T) {
 			r, s, _ := ecdsa.Sign(allBytesEight, testKey, hasher.Hash(tt.message))
 			signature := append(r.Bytes(), s.Bytes()...)
 
-			if !signer.Verify(&ByteHashable{toHash: tt.message}, signature) {
+			if !signer.Verify(tt.message, signature) {
 				t.Errorf("Expected signature to verify, it did not.")
 			}
 
@@ -124,7 +124,7 @@ func TestEcdsaSignerVerifyFailBadSignature(t *testing.T) {
 			r = r.Add(r, s)
 			signature := append(r.Bytes(), s.Bytes()...)
 
-			if signer.Verify(&ByteHashable{toHash: tt.message}, signature) {
+			if signer.Verify(tt.message, signature) {
 				t.Errorf("Expected signature to not verify, it did.")
 			}
 
@@ -152,7 +152,7 @@ func TestEcdsaSignerVerifyFailMismatchHasher(t *testing.T) {
 			r = r.Add(r, s)
 			signature := append(r.Bytes(), s.Bytes()...)
 
-			if signer.Verify(&ByteHashable{toHash: tt.message}, signature) {
+			if signer.Verify(tt.message, signature) {
 				t.Errorf("Expected signature to not verify, it did.")
 			}
 
@@ -181,7 +181,7 @@ func TestEcdsaSignerVerifyFailBadKey(t *testing.T) {
 			r = r.Add(r, s)
 			signature := append(r.Bytes(), s.Bytes()...)
 
-			if signer.Verify(&ByteHashable{toHash: tt.message}, signature) {
+			if signer.Verify(tt.message, signature) {
 				t.Errorf("Expected signature to not verify, it did.")
 			}
 
@@ -210,7 +210,7 @@ func TestEcdsaSignerVerifyFailBadMessage(t *testing.T) {
 			r = r.Add(r, s)
 			signature := append(r.Bytes(), s.Bytes()...)
 
-			if signer.Verify(&ByteHashable{toHash: tt.message}, signature) {
+			if signer.Verify(tt.message, signature) {
 				t.Errorf("Expected signature to not verify, it did.")
 			}
 
@@ -244,7 +244,6 @@ func TestEcdsaConstructorPairSuccess(t *testing.T) {
 			pubKey, _ := FromHex(tt.pubKeyHex)
 			signer, errConSign := tt.signerNew(privKey)
 			verifier, errConVer := tt.verifierNew(pubKey)
-			message := &ByteHashable{toHash: tt.message}
 
 			if !strings.HasPrefix(signer.SuiteType(), verifier.SuiteType()) {
 				t.Errorf(
@@ -261,8 +260,8 @@ func TestEcdsaConstructorPairSuccess(t *testing.T) {
 				t.Errorf("Error creating the signer.")
 			}
 
-			signature1, errSign1 := signer.Sign(message)
-			signature2, errSign2 := signer.Sign(message)
+			signature1, errSign1 := signer.Sign(tt.message)
+			signature2, errSign2 := signer.Sign(tt.message)
 
 			if errSign1 != nil {
 				t.Errorf("Error while signing first time.")
@@ -272,19 +271,19 @@ func TestEcdsaConstructorPairSuccess(t *testing.T) {
 				t.Errorf("Error while signing second time.")
 			}
 
-			if !signer.Verify(message, signature1) {
+			if !signer.Verify(tt.message, signature1) {
 				t.Errorf("Signer didn't verify signature1 for its own message.")
 			}
 
-			if !signer.Verify(message, signature2) {
+			if !signer.Verify(tt.message, signature2) {
 				t.Errorf("Signer didn't verify signature2 for its own message.")
 			}
 
-			if !verifier.Verify(message, signature1) {
+			if !verifier.Verify(tt.message, signature1) {
 				t.Errorf("Verifier didn't verify signature1 for for signer.")
 			}
 
-			if !verifier.Verify(message, signature2) {
+			if !verifier.Verify(tt.message, signature2) {
 				t.Errorf("Verifier didn't verify signature2 for for signer.")
 			}
 

@@ -13,7 +13,7 @@ type Suite interface {
 // to create a cryptographic verifier of a certin type.
 type Verifier interface {
 	Suite
-	Verify(toVerify Hashable, signature []byte) bool
+	Verify(toVerify []byte, signature []byte) bool
 }
 
 // Signer abstraction around signing. This can be a useful abstraction if you don't
@@ -22,30 +22,30 @@ type Verifier interface {
 // you can also verify (especially in the case of ecdsa.)
 type Signer interface {
 	Verifier
-	Sign(toSign Hashable) ([]byte, error)
+	Sign(toSign []byte) ([]byte, error)
 }
 
 // MockSigner mock of the signier interface.
 type MockSigner struct {
 	Suite string
 
-	ToVerify  Hashable
+	ToVerify  []byte
 	Signature []byte
 	VerifyRet bool
 
-	ToSign     Hashable
+	ToSign     []byte
 	SignSigRet []byte
 	SignErrRet error
 }
 
 // Sign mock.
-func (s *MockSigner) Sign(toSign Hashable) ([]byte, error) {
+func (s *MockSigner) Sign(toSign []byte) ([]byte, error) {
 	s.ToSign = toSign
 	return s.SignSigRet, s.SignErrRet
 }
 
 // Verify mock.
-func (s *MockSigner) Verify(toVerify Hashable, signature []byte) bool {
+func (s *MockSigner) Verify(toVerify []byte, signature []byte) bool {
 	s.ToVerify = toVerify
 	s.Signature = signature
 	return s.VerifyRet

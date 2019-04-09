@@ -38,8 +38,8 @@ type EcdsaVerifier struct {
 	suiteType string
 }
 
-func (s *EcdsaVerifier) Verify(toVerify Hashable, signature []byte) bool {
-	messageHash := toVerify.Hash(s.hasher)
+func (s *EcdsaVerifier) Verify(toVerify []byte, signature []byte) bool {
+	messageHash := s.hasher.Hash(toVerify)
 	R, S := splitByteSlice(signature)
 	return ecdsa.Verify(s.publicKey, messageHash, R, S)
 }
@@ -55,8 +55,8 @@ type EcdsaSigner struct {
 	privateKey ecdsa.PrivateKey
 }
 
-func (s *EcdsaSigner) Sign(toSign Hashable) ([]byte, error) {
-	messageHash := toSign.Hash(s.hasher)
+func (s *EcdsaSigner) Sign(toSign []byte) ([]byte, error) {
+	messageHash := s.hasher.Hash(toSign)
 	reader := s.reader(s.hasher, messageHash, s.privateKey.D.Bytes())
 	R, S, err := ecdsa.Sign(reader, &s.privateKey, messageHash)
 	if err != nil {
@@ -65,7 +65,7 @@ func (s *EcdsaSigner) Sign(toSign Hashable) ([]byte, error) {
 	return append(R.Bytes(), S.Bytes()...), nil
 }
 
-func (s *EcdsaSigner) Verify(toVerify Hashable, signature []byte) bool {
+func (s *EcdsaSigner) Verify(toVerify []byte, signature []byte) bool {
 	return s.verifier.Verify(toVerify, signature)
 }
 
