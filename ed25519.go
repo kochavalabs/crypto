@@ -5,6 +5,10 @@ import (
 	"golang.org/x/crypto/ed25519"
 )
 
+// There are two curves commonly used in the 25519 family, c25519 and ed25519,
+// they share some properties, for example the private and public key lengths.
+// In casses where a propertly refers to either one, I've attempted to use the
+// term x25519.
 const (
 	// X25519PrivateKeyLength Private key length for c25519 family of crypto primitives
 	X25519PrivateKeyLength = 32
@@ -27,6 +31,9 @@ func NewEd25519Verifier(pubKey []byte) (Verifier, error) {
 
 // NewEd25519Signer constructor for ed25519 Signer
 func NewEd25519Signer(privKey []byte) (Signer, error) {
+	// The ed25519 library depends on a private key that includes the public
+	// and private key, so to get a private key you must pass a 32 byte private
+	// key to the FromSeed function.
 	key := ed25519.NewKeyFromSeed(privKey)
 	verifier, verErr := NewEd25519Verifier(key[32:])
 	if verErr != nil {
@@ -41,6 +48,9 @@ func NewEd25519Signer(privKey []byte) (Signer, error) {
 // GenerateEd25519KeyPair a valid Curve25519 key pair.
 func GenerateEd25519KeyPair() ([]byte, []byte, error) {
 	pubKey, privKey, genErr := ed25519.GenerateKey(nil)
+	// We take the first 32 bytes as the privKey as the private key. This is
+	// because the underlying crypto library returns a private key that is
+	// actually the private key with the public key appended to it.
 	return privKey[:32], pubKey, genErr
 }
 
