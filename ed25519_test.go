@@ -100,3 +100,17 @@ func TestNewEd25519Signer(t *testing.T) {
 	}
 
 }
+
+func TestNewEd25519KeySize(t *testing.T) {
+	key := []byte{1, 2, 3}
+	_, sigErr := NewEd25519Signer(key)
+	_, verErr := NewEd25519Verifier(key)
+
+	if sigErr == nil {
+		t.Errorf("Did not get signature error.")
+	}
+
+	if verErr == nil {
+		t.Errorf("Did not get verifier error.")
+	}
+}
