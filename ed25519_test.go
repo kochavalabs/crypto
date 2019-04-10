@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"golang.org/x/crypto/ed25519"
 	"reflect"
 	"testing"
 )
@@ -25,7 +26,7 @@ func TestEd25519Sign(t *testing.T) {
 	toSign, _ := FromHex(EdMessageHex)
 	privKey, _ := FromHex(Ed25519PrivHex)
 	signer := ed25519Signer{
-		privKey: privKey,
+		privKey: ed25519.NewKeyFromSeed(privKey),
 	}
 	signature, sigErr := signer.Sign(toSign)
 
@@ -49,4 +50,53 @@ func TestEd25519Verify(t *testing.T) {
 	if !result {
 		t.Errorf("Expected to verify signature.")
 	}
+}
+
+func TestNewEd25519Verifier(t *testing.T) {
+	signature, _ := FromHex(EdSignatureHex)
+	pubKey, _ := FromHex(Ed25519PubHex)
+	message, _ := FromHex(EdMessageHex)
+	verifier, verErr := NewEd25519Verifier(pubKey)
+	if verErr != nil {
+		t.Errorf("Got a constructor error %s", verErr.Error())
+	}
+
+	result := verifier.Verify(message, signature)
+
+	if !result {
+		t.Errorf("Expected to verify signature.")
+	}
+	if verifier.SuiteType() != "ed25519" {
+		t.Errorf("Expected suite type ed25519 got %s", verifier.SuiteType())
+	}
+}
+
+func TestNewEd25519Signer(t *testing.T) {
+	signature, _ := FromHex(EdSignatureHex)
+	message, _ := FromHex(EdMessageHex)
+	privKey, _ := FromHex(Ed25519PrivHex)
+	signer, signerErr := NewEd25519Signer(privKey)
+	if signerErr != nil {
+		t.Errorf("Got a constructor error %s", signerErr.Error())
+	}
+
+	verifyResult := signer.Verify(message, signature)
+
+	if !verifyResult {
+		t.Errorf("Expected to verify signature.")
+	}
+	if signer.SuiteType() != "ed25519" {
+		t.Errorf("Expected suite type ed25519 got %s", signer.SuiteType())
+	}
+
+	signResult, sigErr := signer.Sign(message)
+
+	if sigErr != nil {
+		t.Errorf("Got a sign error %s", sigErr.Error())
+	}
+
+	if !reflect.DeepEqual(signResult, signature) {
+		t.Errorf("Expected %x, signature was %x.", signature, signResult)
+	}
+
 }
