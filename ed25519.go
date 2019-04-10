@@ -7,7 +7,7 @@ import (
 
 // There are two curves commonly used in the 25519 family, c25519 and ed25519,
 // they share some properties, for example the private and public key lengths.
-// In casses where a propertly refers to either one, I've attempted to use the
+// in casses where a propertly refers to either one, I've attempted to use the
 // term x25519.
 const (
 	// X25519PrivateKeyLength Private key length for c25519 family of crypto primitives
@@ -31,6 +31,9 @@ func NewEd25519Verifier(pubKey []byte) (Verifier, error) {
 
 // NewEd25519Signer constructor for ed25519 Signer
 func NewEd25519Signer(privKey []byte) (Signer, error) {
+	if len(privKey) != X25519PrivateKeyLength {
+		return nil, errors.New("key should be 32 bytes got " + string(len(privKey)))
+	}
 	// The ed25519 library depends on a private key that includes the public
 	// and private key, so to get a private key you must pass a 32 byte private
 	// key to the FromSeed function.
