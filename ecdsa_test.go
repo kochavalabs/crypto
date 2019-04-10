@@ -280,11 +280,11 @@ func TestEcdsaConstructorPairSuccess(t *testing.T) {
 			}
 
 			if !verifier.Verify(tt.message, signature1) {
-				t.Errorf("Verifier didn't verify signature1 for for signer.")
+				t.Errorf("Verifier didn't verify signature1 for signer.")
 			}
 
 			if !verifier.Verify(tt.message, signature2) {
-				t.Errorf("Verifier didn't verify signature2 for for signer.")
+				t.Errorf("Verifier didn't verify signature2 for signer.")
 			}
 
 			if reflect.DeepEqual(signature1, signature2) != tt.deterministic {
