@@ -27,8 +27,7 @@ type Signer interface {
 
 // MockSigner mock of the signier interface.
 type MockSigner struct {
-	Suite  string
-	pubKey []byte
+	Suite string
 
 	ToVerify  []byte
 	Signature []byte
@@ -55,9 +54,4 @@ func (s *MockSigner) Verify(toVerify []byte, signature []byte) bool {
 // SuiteType mock.
 func (s *MockSigner) SuiteType() string {
 	return s.Suite
-}
-
-// Public mock.
-func (s *MockSigner) Public() []byte {
-	return s.pubKey
 }
