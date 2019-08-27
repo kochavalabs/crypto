@@ -23,7 +23,6 @@ type Verifier interface {
 type Signer interface {
 	Verifier
 	Sign(toSign []byte) ([]byte, error)
-	Public() []byte
 }
 
 // MockSigner mock of the signier interface.
