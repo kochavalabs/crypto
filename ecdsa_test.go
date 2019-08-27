@@ -77,28 +77,6 @@ func TestEcdsaSignerSign(t *testing.T) {
 	}
 }
 
-func TestEcdsaSignerPublic(t *testing.T) {
-	allBytesEight := &fixedReader{value: 8}
-	hasher := &Sha3_256Hasher{}
-	testKey, _ := ecdsa.GenerateKey(elliptic.P256(), allBytesEight)
-	signer := EcdsaSigner{
-		hasher:     hasher,
-		reader:     newAllBytesEight,
-		privateKey: *testKey,
-		verifier: &EcdsaVerifier{
-			publicKey: &testKey.PublicKey,
-			hasher:    hasher,
-		},
-	}
-
-	expected := elliptic.Marshal(elliptic.P256(), testKey.PublicKey.X, testKey.PublicKey.Y)
-
-	result := signer.Public()
-	if !reflect.DeepEqual(expected, result) {
-		t.Errorf("Expected %s, result was %s.", expected, result)
-	}
-}
-
 func TestEcdsaSignerVerifyPass(t *testing.T) {
 	for _, tt := range signingTestCases {
 		t.Run(ToHex(tt.message), func(t *testing.T) {

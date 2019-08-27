@@ -40,19 +40,6 @@ func TestEd25519Sign(t *testing.T) {
 	}
 }
 
-func TestEd25519Public(t *testing.T) {
-	privKey, _ := FromHex(Ed25519PrivHex)
-	signer := ed25519Signer{
-		privKey: ed25519.NewKeyFromSeed(privKey),
-	}
-	pubKey := signer.Public()
-
-	expected, _ := FromHex(Ed25519PubHex)
-	if !reflect.DeepEqual(pubKey, expected) {
-		t.Errorf("Expected %x, pubkey was %x.", expected, pubKey)
-	}
-}
-
 func TestEd25519Verify(t *testing.T) {
 	signature, _ := FromHex(EdSignatureHex)
 	message, _ := FromHex(EdMessageHex)
@@ -126,5 +113,16 @@ func TestNewEd25519KeySize(t *testing.T) {
 
 	if verErr == nil {
 		t.Errorf("Did not get verifier error.")
+	}
+}
+
+func TestEd25519PublicFromPrivate(t *testing.T) {
+	privKey, _ := FromHex(Ed25519PrivHex)
+
+	pubKey, _ := Ed25519PublicKeyFromPrivate(privKey)
+
+	expected, _ := FromHex(Ed25519PubHex)
+	if !reflect.DeepEqual(pubKey, expected) {
+		t.Errorf("Expected %x, pubkey was %x.", expected, pubKey)
 	}
 }

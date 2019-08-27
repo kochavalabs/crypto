@@ -58,6 +58,17 @@ func GenerateEd25519KeyPair() ([]byte, []byte, error) {
 	return privKey[:32], pubKey, genErr
 }
 
+// Ed25519PublicKeyFromPrivate return the public key associated with a private key for Curve25519.
+func Ed25519PublicKeyFromPrivate(privKey []byte) ([]byte, error) {
+	if len(privKey) != X25519PrivateKeyLength {
+		return nil, errors.New("key should be 32 bytes got " + string(len(privKey)))
+	}
+
+	key := ed25519.NewKeyFromSeed(privKey)
+
+	return key[32:], nil
+}
+
 // ed25519Verifier Verifies a signature using Curve25519 and ed25519
 type ed25519Verifier struct {
 	publicKey ed25519.PublicKey
@@ -90,8 +101,4 @@ func (s *ed25519Signer) Verify(toVerify []byte, signature []byte) bool {
 
 func (s *ed25519Signer) SuiteType() string {
 	return s.verifier.SuiteType()
-}
-
-func (s *ed25519Signer) Public() []byte {
-	return s.privKey[32:]
 }
