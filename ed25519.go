@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"errors"
+
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -55,6 +56,17 @@ func GenerateEd25519KeyPair() ([]byte, []byte, error) {
 	// because the underlying crypto library returns a private key that is
 	// actually the private key with the public key appended to it.
 	return privKey[:32], pubKey, genErr
+}
+
+// Ed25519PublicKeyFromPrivate return the public key associated with a private key for Curve25519.
+func Ed25519PublicKeyFromPrivate(privKey []byte) ([]byte, error) {
+	if len(privKey) != X25519PrivateKeyLength {
+		return nil, errors.New("key should be 32 bytes got " + string(len(privKey)))
+	}
+
+	key := ed25519.NewKeyFromSeed(privKey)
+
+	return key[32:], nil
 }
 
 // ed25519Verifier Verifies a signature using Curve25519 and ed25519
