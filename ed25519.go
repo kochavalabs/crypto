@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"errors"
+
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -89,4 +90,8 @@ func (s *ed25519Signer) Verify(toVerify []byte, signature []byte) bool {
 
 func (s *ed25519Signer) SuiteType() string {
 	return s.verifier.SuiteType()
+}
+
+func (s *ed25519Signer) Public() []byte {
+	return s.privKey[32:]
 }

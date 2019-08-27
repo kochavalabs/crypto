@@ -1,9 +1,10 @@
 package crypto
 
 import (
-	"golang.org/x/crypto/ed25519"
 	"reflect"
 	"testing"
+
+	"golang.org/x/crypto/ed25519"
 )
 
 const Ed25519PubHex = "0x69ec35fafe61e514f4d2e54279671ab7e1e7fee9c4356da912ecd9f49db06773"
@@ -36,6 +37,19 @@ func TestEd25519Sign(t *testing.T) {
 	expected, _ := FromHex(EdSignatureHex)
 	if !reflect.DeepEqual(signature, expected) {
 		t.Errorf("Expected %x, signature was %x.", expected, signature)
+	}
+}
+
+func TestEd25519Public(t *testing.T) {
+	privKey, _ := FromHex(Ed25519PrivHex)
+	signer := ed25519Signer{
+		privKey: ed25519.NewKeyFromSeed(privKey),
+	}
+	pubKey := signer.Public()
+
+	expected, _ := FromHex(Ed25519PubHex)
+	if !reflect.DeepEqual(pubKey, expected) {
+		t.Errorf("Expected %x, pubkey was %x.", expected, pubKey)
 	}
 }
 

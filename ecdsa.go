@@ -73,6 +73,11 @@ func (s *EcdsaSigner) SuiteType() string {
 	return s.verifier.SuiteType()
 }
 
+func (s *EcdsaSigner) Public() []byte {
+	pubKey := s.verifier.publicKey
+	return elliptic.Marshal(pubKey.Curve, pubKey.X, pubKey.Y)
+}
+
 // Convenience function for creating verifiers. Used in functions such as
 // NewP256Sha3_256DetSigner
 func getVerifier(
