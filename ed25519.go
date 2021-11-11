@@ -2,8 +2,9 @@ package crypto
 
 import (
 	"errors"
+	"fmt"
 
-	"golang.org/x/crypto/ed25519"
+	"crypto/ed25519"
 )
 
 // There are two curves commonly used in the 25519 family, c25519 and ed25519,
@@ -22,7 +23,7 @@ const (
 // NewEd25519Verifier constructor for ed25519 Verifier
 func NewEd25519Verifier(pubKey []byte) (Verifier, error) {
 	if len(pubKey) != X25519PublicKeyLength {
-		return nil, errors.New("key should be 32 bytes got " + string(len(pubKey)))
+		return nil, errors.New("key should be 32 bytes got " + fmt.Sprint(len(pubKey)))
 	}
 	return &ed25519Verifier{
 		publicKey: pubKey,
@@ -33,7 +34,7 @@ func NewEd25519Verifier(pubKey []byte) (Verifier, error) {
 // NewEd25519Signer constructor for ed25519 Signer
 func NewEd25519Signer(privKey []byte) (Signer, error) {
 	if len(privKey) != X25519PrivateKeyLength {
-		return nil, errors.New("key should be 32 bytes got " + string(len(privKey)))
+		return nil, errors.New("key should be 32 bytes got " + fmt.Sprint(len(privKey)))
 	}
 	// The ed25519 library depends on a private key that includes the public
 	// and private key, so to get a private key you must pass a 32 byte private
@@ -61,7 +62,7 @@ func GenerateEd25519KeyPair() ([]byte, []byte, error) {
 // Ed25519PublicKeyFromPrivate return the public key associated with a private key for Curve25519.
 func Ed25519PublicKeyFromPrivate(privKey []byte) ([]byte, error) {
 	if len(privKey) != X25519PrivateKeyLength {
-		return nil, errors.New("key should be 32 bytes got " + string(len(privKey)))
+		return nil, errors.New("key should be 32 bytes got " + fmt.Sprint(len(privKey)))
 	}
 
 	key := ed25519.NewKeyFromSeed(privKey)

@@ -51,7 +51,7 @@ func (r *deterministicReader) Read(p []byte) (n int, err error) {
 	if len(digest) < len(p) {
 		return 0, errors.New("Missmatch between entropy length and hash length.")
 	}
-	for i, _ := range p {
+	for i := range p {
 		p[i] = digest[i]
 	}
 	return len(p), nil

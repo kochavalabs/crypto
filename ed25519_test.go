@@ -1,10 +1,9 @@
 package crypto
 
 import (
+	"crypto/ed25519"
 	"reflect"
 	"testing"
-
-	"golang.org/x/crypto/ed25519"
 )
 
 const Ed25519PubHex = "0x69ec35fafe61e514f4d2e54279671ab7e1e7fee9c4356da912ecd9f49db06773"

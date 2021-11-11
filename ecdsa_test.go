@@ -18,7 +18,7 @@ type fixedReader struct {
 }
 
 func (r *fixedReader) Read(p []byte) (n int, err error) {
-	for i, _ := range p {
+	for i := range p {
 		p[i] = r.value
 	}
 	return len(p), nil
