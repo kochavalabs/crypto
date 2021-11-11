@@ -3,7 +3,7 @@ package crypto
 import (
 	"errors"
 
-	"golang.org/x/crypto/ed25519"
+	"crypto/ed25519"
 )
 
 // There are two curves commonly used in the 25519 family, c25519 and ed25519,
