@@ -9,11 +9,11 @@ import (
 
 // There are two curves commonly used in the 25519 family, c25519 and ed25519,
 // they share some properties, for example the private and public key lengths.
-// in casses where a propertly refers to either one, I've attempted to use the
+// in casses where a propertly refers to either one use the
 // term x25519.
 const (
 	// X25519PrivateKeyLength Private key length for c25519 family of crypto primitives
-	X25519PrivateKeyLength = 32
+	X25519PrivateKeyLength = 64
 	// X25519PublicKeyLength Public key length for c25519 family of crypto primitives
 	X25519PublicKeyLength = 32
 	// X25519SignatureLength Signature length for c25519 family of crypto primitives
@@ -34,40 +34,32 @@ func NewEd25519Verifier(pubKey []byte) (Verifier, error) {
 // NewEd25519Signer constructor for ed25519 Signer
 func NewEd25519Signer(privKey []byte) (Signer, error) {
 	if len(privKey) != X25519PrivateKeyLength {
-		return nil, errors.New("key should be 32 bytes got " + fmt.Sprint(len(privKey)))
+		return nil, errors.New("key should be 64 bytes got " + fmt.Sprint(len(privKey)))
 	}
-	// The ed25519 library depends on a private key that includes the public
-	// and private key, so to get a private key you must pass a 32 byte private
-	// key to the FromSeed function.
-	key := ed25519.NewKeyFromSeed(privKey)
-	verifier, verErr := NewEd25519Verifier(key[32:])
+
+	verifier, verErr := NewEd25519Verifier(privKey[32:])
 	if verErr != nil {
 		return nil, verErr
 	}
+
 	return &ed25519Signer{
-		privKey:  key,
+		privKey:  privKey,
 		verifier: verifier,
 	}, nil
 }
 
 // GenerateEd25519KeyPair a valid Curve25519 key pair.
 func GenerateEd25519KeyPair() ([]byte, []byte, error) {
-	pubKey, privKey, genErr := ed25519.GenerateKey(nil)
-	// We take the first 32 bytes as the privKey as the private key. This is
-	// because the underlying crypto library returns a private key that is
-	// actually the private key with the public key appended to it.
-	return privKey[:32], pubKey, genErr
+	return ed25519.GenerateKey(nil)
 }
 
 // Ed25519PublicKeyFromPrivate return the public key associated with a private key for Curve25519.
 func Ed25519PublicKeyFromPrivate(privKey []byte) ([]byte, error) {
 	if len(privKey) != X25519PrivateKeyLength {
-		return nil, errors.New("key should be 32 bytes got " + fmt.Sprint(len(privKey)))
+		return nil, errors.New("key should be 64 bytes got " + fmt.Sprint(len(privKey)))
 	}
-
-	key := ed25519.NewKeyFromSeed(privKey)
-
-	return key[32:], nil
+	// last 32 bytes of the private key are the public key
+	return privKey[32:], nil
 }
 
 // ed25519Verifier Verifies a signature using Curve25519 and ed25519
