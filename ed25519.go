@@ -49,7 +49,7 @@ func NewEd25519Signer(privKey []byte) (Signer, error) {
 }
 
 // GenerateEd25519KeyPair a valid Curve25519 key pair.
-func GenerateEd25519KeyPair() ([]byte, []byte, error) {
+func GenerateEd25519KeyPair() (pub []byte, priv []byte, err error) {
 	return ed25519.GenerateKey(nil)
 }
 
@@ -60,6 +60,15 @@ func Ed25519PublicKeyFromPrivate(privKey []byte) ([]byte, error) {
 	}
 	// last 32 bytes of the private key are the public key
 	return privKey[32:], nil
+}
+
+func Ed25519KeyPairFromSeed(seed []byte) (pub []byte, priv []byte, err error) {
+	if len(seed) != 32 {
+		return nil, nil, errors.New("invalid seed length, seed must be 32 bytes")
+	}
+	priv = ed25519.NewKeyFromSeed(seed)
+	pub = priv[32:]
+	return pub, priv, nil
 }
 
 // ed25519Verifier Verifies a signature using Curve25519 and ed25519
