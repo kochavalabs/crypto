@@ -1,26 +1,16 @@
 require('./wasm_exec.js');
-const fetch = require('node-fetch');
 
 const go = new Go(); // Defined in wasm_exec.js
-const WASM_URL = require('path').join(__dirname, 'crypto.wasm');
 
-let wasm;
+// Read in wasm bytes
+const path = require('path').join(__dirname, 'crypto.wasm');
+const bytes = require('fs').readFileSync(path);
 
-if ('instantiateStreaming' in WebAssembly) {
-	WebAssembly.instantiateStreaming(fetch(WASM_URL), go.importObject).then(function (obj) {
-		wasm = obj.instance;
-		go.run(wasm);
-	})
-} else {
-	fetch(WASM_URL).then(resp =>
-		resp.arrayBuffer()
-	).then(bytes =>
-		WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
-			wasm = obj.instance;
-			go.run(wasm);
-		})
-	)
-}
+// Instantiate
+const wasmModule = new WebAssembly.Module(bytes);
+const wasmInstance = new WebAssembly.Instance(wasmModule, go.importObject);
+go.run(wasmInstance);
 
-module.exports.__wasm = wasm;
-module.exports = GenerateEd25519KeyPair()
+// Export Functions
+module.exports.GenerateEd25519KeyPair = GenerateEd25519KeyPair
+module.exports.NewEd25519Signer = NewEd25519Signer

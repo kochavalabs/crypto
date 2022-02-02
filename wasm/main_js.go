@@ -10,8 +10,8 @@ func GenerateEd25519KeyPair() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		pub, priv, err := crypto.GenerateEd25519KeyPair()
 		return js.ValueOf(map[string]interface{}{
-			"pub":   pub,
-			"priv":  priv,
+			"pub":   crypto.ToHex(pub),
+			"priv":  crypto.ToHex(priv),
 			"error": convertError(err),
 		})
 	})
@@ -20,6 +20,7 @@ func GenerateEd25519KeyPair() js.Func {
 func main() {
 	c := make(chan struct{})
 	js.Global().Set("GenerateEd25519KeyPair", GenerateEd25519KeyPair())
+	js.Global().Set("NewEd25519Signer", js.FuncOf(NewEd25519Signer))
 	<-c
 }
 
