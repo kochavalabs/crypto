@@ -28,3 +28,4 @@ function wrapError(func) {
 // Export Functions
 module.exports.GenerateEd25519KeyPair = wrapError(GenerateEd25519KeyPair)
 module.exports.NewEd25519Signer = wrapError(NewEd25519Signer)
+module.exports.NewEd25519Verifier = wrapError(NewEd25519Verifier)

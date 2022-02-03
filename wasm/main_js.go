@@ -8,6 +8,7 @@ func main() {
 	c := make(chan struct{})
 	js.Global().Set("GenerateEd25519KeyPair", GenerateEd25519KeyPair())
 	js.Global().Set("NewEd25519Signer", js.FuncOf(NewEd25519Signer))
+	js.Global().Set("NewEd25519Verifier", js.FuncOf(NewEd25519Verifier))
 	<-c
 }
 
