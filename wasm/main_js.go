@@ -2,23 +2,7 @@ package main
 
 import (
 	"syscall/js"
-
-	"github.com/kochavalabs/crypto"
 )
-
-func GenerateEd25519KeyPair() js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		pub, priv, err := crypto.GenerateEd25519KeyPair()
-		if err != nil {
-			return convertError(err)
-		}
-
-		return js.ValueOf(map[string]interface{}{
-			"pub":  crypto.ToHex(pub),
-			"priv": crypto.ToHex(priv),
-		})
-	})
-}
 
 func main() {
 	c := make(chan struct{})
