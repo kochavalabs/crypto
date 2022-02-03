@@ -15,17 +15,17 @@ type ed25519SignerWrapper struct {
 // First argument is a string Hex Private Key
 func NewEd25519Signer(this js.Value, args []js.Value) interface{} {
 	if len(args) != 1 {
-		return errors.New("NewEd25519Signer must receive hex private key as argument").Error()
+		return convertError(errors.New("NewEd25519Signer must receive hex private key as argument"))
 	}
 
 	key, err := crypto.FromHex(args[0].String())
 	if err != nil {
-		return err.Error()
+		return convertError(err)
 	}
 
 	signer, err := crypto.NewEd25519Signer(key)
 	if err != nil {
-		return err.Error()
+		return convertError(err)
 	}
 
 	wrapper := &ed25519SignerWrapper{
@@ -41,17 +41,17 @@ func NewEd25519Signer(this js.Value, args []js.Value) interface{} {
 func (s *ed25519SignerWrapper) sign() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		if len(args) != 1 {
-			return errors.New("NewEd25519Signer must receive hex data to sign").Error()
+			return convertError(errors.New("NewEd25519Signer must receive hex data to sign"))
 		}
 
 		toSign, err := crypto.FromHex(args[0].String())
 		if err != nil {
-			return err.Error()
+			return convertError(err)
 		}
 
 		signature, err := s.signer.Sign(toSign)
 		if err != nil {
-			return err.Error()
+			return convertError(err)
 		}
 
 		return js.ValueOf(crypto.ToHex(signature))
