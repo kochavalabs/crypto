@@ -74,6 +74,49 @@ func GenerateEd25519KeyPair() js.Func {
 	})
 }
 
+func Ed25519PublicKeyFromPrivate() js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if len(args) != 1 {
+			return convertError(errors.New("Ed25519PublicKeyFromPrivate must receive hex private key as argument"))
+		}
+
+		key, err := crypto.FromHex(args[0].String())
+		if err != nil {
+			return convertError(err)
+		}
+
+		pub, err := crypto.Ed25519PublicKeyFromPrivate(key)
+		if err != nil {
+			return convertError(err)
+		}
+
+		return js.ValueOf(crypto.ToHex(pub))
+	})
+}
+
+func Ed25519KeyPairFromSeed() js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if len(args) != 1 {
+			return convertError(errors.New("Ed25519KeyPairFromSeed must receive hex seed as argument"))
+		}
+
+		seed, err := crypto.FromHex(args[0].String())
+		if err != nil {
+			return convertError(err)
+		}
+
+		pub, priv, err := crypto.Ed25519KeyPairFromSeed(seed)
+		if err != nil {
+			return convertError(err)
+		}
+
+		return js.ValueOf(map[string]interface{}{
+			"pub":  crypto.ToHex(pub),
+			"priv": crypto.ToHex(priv),
+		})
+	})
+}
+
 type ed25519VerifierWrapper struct {
 	verifier crypto.Verifier
 }
