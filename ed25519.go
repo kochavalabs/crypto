@@ -9,7 +9,7 @@ import (
 
 // There are two curves commonly used in the 25519 family, c25519 and ed25519,
 // they share some properties, for example the private and public key lengths.
-// in casses where a propertly refers to either one use the
+// in cases where a propertly refers to either one use the
 // term x25519.
 const (
 	// X25519PrivateKeyLength Private key length for c25519 family of crypto primitives
