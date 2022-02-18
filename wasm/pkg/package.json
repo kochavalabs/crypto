@@ -3,9 +3,10 @@
   "version": "0.1.4",
   "description": "Library that provides ed25519 crypto functions for Mazzaroth",
   "files": [
-    "crypto.wasm",
-    "crypto.js",
-    "wasm_exec.js"
+    "bundler/*",
+    "node/*",
+    "wasm_exec.js",
+    "crypto.wasm"
   ],
   "repository": {
     "type": "git",
@@ -13,5 +14,6 @@
   },
   "author": "KochavaLabs",
   "license": "MIT",
+  "browser": "bundler/crypto.js",
   "main": "crypto.js"
 }
