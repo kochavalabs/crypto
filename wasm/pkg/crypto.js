@@ -11,23 +11,5 @@ const wasmModule = new WebAssembly.Module(bytes);
 const wasmInstance = new WebAssembly.Instance(wasmModule, go.importObject);
 go.run(wasmInstance);
 
-// Return a function that calls the given WebAssembly Module function
-// and throws an error if the result of the WebAssembly function contains
-// an error field
-function wrapError(func) {
-	return function (args) {
-		const result = func(args)
-		if ((result != null) && ('error' in result)) {
-			throw result.error
-		}
-		return result
-	}
-}
-
-
 // Export Functions
-module.exports.GenerateEd25519KeyPair = wrapError(GenerateEd25519KeyPair)
-module.exports.NewEd25519Signer = wrapError(NewEd25519Signer)
-module.exports.NewEd25519Verifier = wrapError(NewEd25519Verifier)
-module.exports.Ed25519PublicKeyFromPrivate = wrapError(Ed25519PublicKeyFromPrivate)
-module.exports.Ed25519KeyPairFromSeed = wrapError(Ed25519KeyPairFromSeed)
+module.exports.NewCrypto = New

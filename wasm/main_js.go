@@ -6,11 +6,17 @@ import (
 
 func main() {
 	c := make(chan struct{})
-	js.Global().Set("GenerateEd25519KeyPair", GenerateEd25519KeyPair())
-	js.Global().Set("NewEd25519Signer", js.FuncOf(NewEd25519Signer))
-	js.Global().Set("NewEd25519Verifier", js.FuncOf(NewEd25519Verifier))
-	js.Global().Set("Ed25519PublicKeyFromPrivate", Ed25519PublicKeyFromPrivate())
-	js.Global().Set("Ed25519KeyPairFromSeed", Ed25519KeyPairFromSeed())
+	// Return a single function "New" that returns an object with
+	// a set of functions available from the Crypto library
+	js.Global().Set("New", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return js.ValueOf(map[string]interface{}{
+			"GenerateEd25519KeyPair":      GenerateEd25519KeyPair(),
+			"NewEd25519Signer":            js.FuncOf(NewEd25519Signer),
+			"NewEd25519Verifier":          js.FuncOf(NewEd25519Verifier),
+			"Ed25519PublicKeyFromPrivate": Ed25519PublicKeyFromPrivate(),
+			"Ed25519KeyPairFromSeed":      Ed25519KeyPairFromSeed(),
+		})
+	}))
 	<-c
 }
 
