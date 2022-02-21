@@ -2,6 +2,9 @@
   "name": "mazzaroth-crypto",
   "version": "0.1.4",
   "description": "Library that provides ed25519 crypto functions for Mazzaroth",
+  "scripts": {
+    "build": "webpack"
+  },
   "files": [
     "bundler/*",
     "node/*",
@@ -14,6 +17,10 @@
   },
   "author": "KochavaLabs",
   "license": "MIT",
-  "browser": "bundler/crypto.js",
-  "main": "crypto.js"
+  "main": "dist/crypto.js",
+  "devDependencies": {
+    "base64-loader": "^1.0.0",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.9.2"
+  }
 }
