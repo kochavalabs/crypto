@@ -7,3 +7,4 @@ build-tiny-wasm:
 build-wasm:
 	GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o ./pkg/crypto.wasm .
 	cp -p ${GOROOT}/misc/wasm/wasm_exec.js pkg
+	sed -i '' -e 's/require(/__non_webpack_require__(/g' pkg/wasm_exec.js
